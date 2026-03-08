@@ -11,8 +11,10 @@ Obtén tus pistas de Spotify en FLAC real desde Tidal, Qobuz, Amazon Music y Dee
 ### [Descargar SpotiFLAC-ES v1.0.0-es](https://github.com/DrextenMax/SpotiFLAC-ES/releases/tag/v1.0.0-es)
 
 ## Captura
+<img width="1024" height="630" alt="image" src="https://github.com/user-attachments/assets/a7901cf6-68e6-4305-98a4-0e3e2986e7ed" />
+<img width="1024" height="630" alt="SpotiFLAC_WSL71vJj51" src="https://github.com/user-attachments/assets/b541b9e1-bbbf-44f6-9cbc-6072257f9155" />
 
-_(Añade aquí una captura de tu versión en español cuando la tengas.)_
+
 
 ## ¿Qué es SpotiFLAC-ES?
 
