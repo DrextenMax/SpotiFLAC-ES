@@ -1,95 +1,88 @@
-# SpotiFLAC
+# SpotiFLAC-ES
 
-<a href="https://trendshift.io/repositories/15737" target="_blank"><img src="https://trendshift.io/api/badge/repositories/15737" alt="afkarxyz%2FSpotiFLAC | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
+Fork en español de SpotiFLAC con mejoras de interfaz, flujo de uso y opciones de conversión automática.
 
-Get Spotify tracks in true FLAC from Tidal, Qobuz, Amazon Music & Deezer — no account required.
+Obtén tus pistas de Spotify en FLAC real desde Tidal, Qobuz, Amazon Music y Deezer — sin cuenta necesaria.[web:16]
 
 ![Windows](https://img.shields.io/badge/Windows-10%2B-0078D6?style=for-the-badge&logo=data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI1MTIiIGhlaWdodD0iNTEyIiB2aWV3Qm94PSIwIDAgMjAgMjAiPjxwYXRoIGZpbGw9IiNmZmZmZmYiIGZpbGwtcnVsZT0iZXZlbm9kZCIgZD0iTTIwIDEwLjg3M1YyMEw4LjQ3OSAxOC41MzdsLjAwMS03LjY2NEgyMFptLTEzLjEyIDBsLS4wMDEgNy40NjFMMCAxNy40NjF2LTYuNTg4aDYuODhaTTIwIDkuMjczSDguNDhsLS4wMDEtNy44MUwyMCAwdjkuMjczWk02Ljg3OSAxLjY2NmwuMDAxIDcuNjA3SDBWMi41MzlsNi44NzktLjg3M1oiLz48L3N2Zz4=)
 ![macOS](https://img.shields.io/badge/macOS-10.13%2B-000000?style=for-the-badge&logo=apple&logoColor=white)
 ![Linux](https://img.shields.io/badge/Linux-Any-FCC624?style=for-the-badge&logo=linux&logoColor=white)
-[![Telegram Channel](https://img.shields.io/badge/CHANNEL-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/spotiflac)
-[![Telegram Community](https://img.shields.io/badge/COMMUNITY-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/spotiflac_chat)
 
-### [Download](https://github.com/afkarxyz/SpotiFLAC/releases)
+### [Descargar SpotiFLAC-ES v1.0.0-es](https://github.com/DrextenMax/SpotiFLAC-ES/releases/tag/v1.0.0-es)
 
-## Screenshot
+## Captura
 
-![Image](https://github.com/user-attachments/assets/adbdc056-bace-44a9-8ba6-898b4526b65a)
+_(Añade aquí una captura de tu versión en español cuando la tengas.)_
 
-## Other projects
+## ¿Qué es SpotiFLAC-ES?
 
-### [SpotiFLAC Next](https://github.com/spotiverse/SpotiFLAC-Next)
+SpotiFLAC-ES es un fork no oficial del proyecto original **SpotiFLAC** de [afkarxyz](https://github.com/afkarxyz/SpotiFLAC), adaptado y mejorado para usuarios hispanohablantes.[web:16]
 
-Get Spotify tracks in Hi-Res lossless FLACs — no account required.
+Mantiene el mismo motor interno para obtener pistas en FLAC real, pero añade una experiencia de uso más guiada, en español y con nuevas opciones de automatización.
 
-### [SpotiDownloader](https://github.com/afkarxyz/SpotiDownloader)
+## Cambios clave frente al original
 
-Get Spotify tracks in MP3 and FLAC via spotidownloader.com
+- Interfaz de usuario traducida **completamente al español**.
+- Pantalla de aviso educativo y splash inicial personalizada.
+- Nueva opción de conversión automática tras la descarga (por ejemplo, convertir FLAC a otros formatos sin herramientas externas).
+- Ajustes en la configuración por defecto para simplificar el flujo de descarga para usuarios nuevos.
+- Textos y estilos revisados para una experiencia más clara en español.
 
-### [SpotubeDL](https://spotubedl.com)
+## Otros proyectos relacionados
 
-Download Spotify Tracks, Albums, Playlists as MP3/OGG/Opus with High Quality.
+### [SpotiFLAC (original)](https://github.com/afkarxyz/SpotiFLAC)
+
+Proyecto original de SpotiFLAC, desarrollado y mantenido por [afkarxyz](https://github.com/afkarxyz).[web:16]
 
 ### [SpotiFLAC (Mobile)](https://github.com/zarzet/SpotiFLAC-Mobile)
 
-SpotiFLAC for Android & iOS — maintained by [@zarzet](https://github.com/zarzet)
+Versión móvil para Android e iOS, mantenida por [@zarzet](https://github.com/zarzet).[web:58]
 
 ## FAQ
 
-### Is this software free?
+### ¿Este software es gratuito?
 
-_Yes. This software is completely free.
-You do not need an account, login, or subscription.
-All you need is an internet connection._
+Sí. Este software es completamente gratuito.
+No necesitas cuenta, inicio de sesión ni suscripción.
+Solo necesitas conexión a internet.[web:16]
 
-### Can using this software get my Spotify account suspended or banned?
+### ¿Puede peligrar mi cuenta de Spotify?
 
-_No.
-This software has no connection to your Spotify account.
-Spotify data is obtained through reverse engineering of the Spotify Web Player, not through user authentication._
+No.
+Esta herramienta no se conecta a tu cuenta de Spotify.
+Los datos se obtienen mediante ingeniería inversa del reproductor web de Spotify, no a través de tu usuario ni contraseña.[web:16]
 
-### Where does the audio come from?
+### ¿De dónde viene el audio?
 
-_The audio is fetched using third-party APIs._
+El audio se obtiene utilizando APIs de terceros, igual que en el proyecto original.[web:16]
 
-### Why does metadata fetching sometimes fail?
+### ¿Por qué a veces falla la obtención de metadatos?
 
-_This usually happens because your IP address has been rate-limited.
-You can wait and try again later, or use a VPN to bypass the rate limit._
+Normalmente se debe a que tu IP ha sido limitada (rate limit).
+Puedes esperar y volver a intentarlo más tarde, o usar una VPN.[web:16]
 
-### Why does Windows Defender or antivirus flag or delete the file?
+### ¿Por qué mi antivirus detecta el archivo?
 
-_This is a false positive.
-It likely happens because the executable is compressed using UPX._
+Se trata de un falso positivo frecuente, debido a que el ejecutable puede estar comprimido con UPX.
+Si lo prefieres, puedes compilar el programa tú mismo desde el código fuente.[web:16]
 
-_If you are concerned, you can fork the repository and build the software yourself from source._
+## Aviso legal
 
-### Want to support the project?
+Este proyecto es para uso **educativo y privado únicamente**.
+El desarrollador de este fork no aprueba ni fomenta la infracción de derechos de autor.[web:16]
 
-_If this software is useful and brings you value,
-consider supporting the project by buying me a coffee.
-Your support helps keep development going._
+**SpotiFLAC-ES** es una herramienta de terceros y no está afiliada, respaldada ni relacionada con Spotify, Tidal, Qobuz, Amazon Music, Deezer ni ningún otro servicio de streaming.[web:16]
 
-[![Ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/afkarxyz)
+Eres el único responsable de:
 
-## Disclaimer
+1. Asegurarte de que el uso de este software cumple las leyes de tu país.
+2. Leer y respetar los Términos de servicio de cada plataforma.
+3. Cualquier consecuencia legal derivada del uso indebido de esta herramienta.[web:16]
 
-This project is for **educational and private use only**. The developer does not condone or encourage copyright infringement.
+El software se proporciona “tal cual”, sin ningún tipo de garantía. El autor no se hace responsable de posibles bloqueos, daños o problemas legales derivados de su uso.[web:16]
 
-**SpotiFLAC** is a third-party tool and is not affiliated with, endorsed by, or connected to Spotify, Tidal, Qobuz, Amazon Music, Deezer or any other streaming service.
+## Créditos
 
-You are solely responsible for:
-
-1. Ensuring your use of this software complies with your local laws.
-2. Reading and adhering to the Terms of Service of the respective platforms.
-3. Any legal consequences resulting from the misuse of this tool.
-
-The software is provided "as is", without warranty of any kind. The author assumes no liability for any bans, damages, or legal issues arising from its use.
-
-## API Credits
-
-[MusicBrainz](https://musicbrainz.org) · [Spotify Lyrics API](https://github.akashrchandran.in/spotify-lyrics-api) · [LRCLIB](https://lrclib.net) · [Song.link](https://song.link) · [hifi-api](https://github.com/binimum/hifi-api) · [dabmusic.xyz](https://dabmusic.xyz) · [yoinkify.lol](https://github.com/chasemarshall/yoink)
-
-> [!TIP]
->
-> **Star Us**, You will receive all release notifications from GitHub without any delay ~
+- Proyecto original: [SpotiFLAC](https://github.com/afkarxyz/SpotiFLAC) por afkarxyz.[web:16]
+- APIs externas usadas por el proyecto original: MusicBrainz, Spotify Lyrics API, LRCLIB, Song.link, hifi-api, dabmusic.xyz, yoinkify.lol.[web:16]
+- Adaptación al español y mejoras de UX/automatización: DrextenMax.
