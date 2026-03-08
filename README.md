@@ -27,16 +27,6 @@ Mantiene el mismo motor interno para obtener pistas en FLAC real, pero añade un
 - Ajustes en la configuración por defecto para simplificar el flujo de descarga para usuarios nuevos.
 - Textos y estilos revisados para una experiencia más clara en español.
 
-## Otros proyectos relacionados
-
-### [SpotiFLAC (original)](https://github.com/afkarxyz/SpotiFLAC)
-
-Proyecto original de SpotiFLAC, desarrollado y mantenido por [afkarxyz](https://github.com/afkarxyz).[web:16]
-
-### [SpotiFLAC (Mobile)](https://github.com/zarzet/SpotiFLAC-Mobile)
-
-Versión móvil para Android e iOS, mantenida por [@zarzet](https://github.com/zarzet).[web:58]
-
 ## FAQ
 
 ### ¿Este software es gratuito?
