@@ -25,7 +25,7 @@ export function Sidebar({ currentPage, onPageChange }: SidebarProps) {
             </Button>
           </TooltipTrigger>
           <TooltipContent side="right">
-            <p>Home</p>
+            <p>Inicio</p>
           </TooltipContent>
         </Tooltip>
 
@@ -36,7 +36,7 @@ export function Sidebar({ currentPage, onPageChange }: SidebarProps) {
             </Button>
           </TooltipTrigger>
           <TooltipContent side="right">
-            <p>History</p>
+            <p>Historial</p>
           </TooltipContent>
         </Tooltip>
 
@@ -47,7 +47,7 @@ export function Sidebar({ currentPage, onPageChange }: SidebarProps) {
             </Button>
           </TooltipTrigger>
           <TooltipContent side="right">
-            <p>Audio Quality Analyzer</p>
+            <p>Analizador de Calidad de Audio</p>
           </TooltipContent>
         </Tooltip>
 
@@ -58,7 +58,7 @@ export function Sidebar({ currentPage, onPageChange }: SidebarProps) {
             </Button>
           </TooltipTrigger>
           <TooltipContent side="right">
-            <p>Audio Converter</p>
+            <p>Convertidor de Audio</p>
           </TooltipContent>
         </Tooltip>
 
@@ -69,7 +69,7 @@ export function Sidebar({ currentPage, onPageChange }: SidebarProps) {
             </Button>
           </TooltipTrigger>
           <TooltipContent side="right">
-            <p>File Manager</p>
+            <p>Gestor de Archivos</p>
           </TooltipContent>
         </Tooltip>
 
@@ -91,7 +91,7 @@ export function Sidebar({ currentPage, onPageChange }: SidebarProps) {
             </Button>
           </TooltipTrigger>
           <TooltipContent side="right">
-            <p>Settings</p>
+            <p>Ajustes</p>
           </TooltipContent>
         </Tooltip>
       </div>
@@ -104,17 +104,17 @@ export function Sidebar({ currentPage, onPageChange }: SidebarProps) {
             </Button>
           </TooltipTrigger>
           <TooltipContent side="right">
-            <p>About</p>
+            <p>Acerda de SpotiFLAC-MP3</p>
           </TooltipContent>
         </Tooltip>
         <Tooltip delayDuration={0}>
           <TooltipTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-10 w-10 hover:bg-primary/10 hover:text-primary" onClick={() => openExternal("https://ko-fi.com/afkarxyz")}>
+            <Button variant="ghost" size="icon" className="h-10 w-10 hover:bg-primary/10 hover:text-primary" onClick={() => openExternal("https://ko-fi.com/jsanchezc")}>
               <CoffeeIcon size={20} loop={true}/>
             </Button>
           </TooltipTrigger>
           <TooltipContent side="right">
-            <p>Support me on Ko-fi</p>
+            <p>Apoyame en Ko-fi</p>
           </TooltipContent>
         </Tooltip>
       </div>

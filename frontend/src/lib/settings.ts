@@ -33,6 +33,7 @@ export interface Settings {
     useFirstArtistOnly: boolean;
     useSingleGenre: boolean;
     embedGenre: boolean;
+    autoConvertToMp3?: boolean;
 }
 export const FOLDER_PRESETS: Record<FolderPreset, {
     label: string;
@@ -341,6 +342,7 @@ export interface TemplateData {
     year?: string;
     date?: string;
     playlist?: string;
+
 }
 export function parseTemplate(template: string, data: TemplateData): string {
     if (!template)
@@ -358,13 +360,21 @@ export function parseTemplate(template: string, data: TemplateData): string {
     return result;
 }
 export async function getSettingsWithDefaults(): Promise<Settings> {
-    const settings = await loadSettings();
-    if (!settings.downloadPath) {
-        settings.downloadPath = await fetchDefaultPath();
-        await saveSettings(settings);
-    }
-    return settings;
+  const settings = await loadSettings();
+
+  if (!settings.downloadPath) {
+    settings.downloadPath = await fetchDefaultPath();
+  }
+
+  if (settings.autoConvertToMp3 === undefined) {
+    settings.autoConvertToMp3 = true;
+  }
+
+  await saveSettings(settings);
+  return settings;
 }
+
+
 export async function saveSettings(settings: Settings): Promise<void> {
     try {
         cachedSettings = settings;

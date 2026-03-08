@@ -555,17 +555,15 @@ func FilterTrack(data map[string]interface{}, albumFetchData ...map[string]inter
 		copyrightData := getMap(albumData, "copyright")
 		if len(copyrightData) > 0 {
 			copyrightItems := getSlice(copyrightData, "items")
-			if copyrightItems != nil {
-				for _, item := range copyrightItems {
-					itemMap, ok := item.(map[string]interface{})
-					if !ok {
-						continue
-					}
-					if getString(itemMap, "type") != "P" {
-						copyrightInfo = append(copyrightInfo, map[string]interface{}{
-							"text": getString(itemMap, "text"),
-						})
-					}
+			for _, item := range copyrightItems {
+				itemMap, ok := item.(map[string]interface{})
+				if !ok {
+					continue
+				}
+				if getString(itemMap, "type") != "P" {
+					copyrightInfo = append(copyrightInfo, map[string]interface{}{
+						"text": getString(itemMap, "text"),
+					})
 				}
 			}
 		}
@@ -574,20 +572,18 @@ func FilterTrack(data map[string]interface{}, albumFetchData ...map[string]inter
 		if len(tracksData) > 0 {
 			discNumbers := make(map[int]bool)
 			trackItems := getSlice(tracksData, "items")
-			if trackItems != nil {
-				for _, item := range trackItems {
-					itemMap, ok := item.(map[string]interface{})
-					if !ok {
-						continue
+			for _, item := range trackItems {
+				itemMap, ok := item.(map[string]interface{})
+				if !ok {
+					continue
+				}
+				trackItem := getMap(itemMap, "track")
+				if len(trackItem) > 0 {
+					discNum := int(getFloat64(trackItem, "discNumber"))
+					if discNum == 0 {
+						discNum = 1
 					}
-					trackItem := getMap(itemMap, "track")
-					if len(trackItem) > 0 {
-						discNum := int(getFloat64(trackItem, "discNumber"))
-						if discNum == 0 {
-							discNum = 1
-						}
-						discNumbers[discNum] = true
-					}
+					discNumbers[discNum] = true
 				}
 			}
 			if len(discNumbers) > 0 {
@@ -656,7 +652,7 @@ func FilterTrack(data map[string]interface{}, albumFetchData ...map[string]inter
 
 		albumArtistsString := ""
 		albumLabel := ""
-		if albumFetchDataMap != nil && len(albumFetchDataMap) > 0 {
+		if len(albumFetchDataMap) > 0 {
 			albumUnionData := getMap(getMap(albumFetchDataMap, "data"), "albumUnion")
 			if len(albumUnionData) > 0 {
 				albumArtists := extractArtists(getMap(albumUnionData, "artists"))
@@ -832,78 +828,74 @@ func FilterAlbum(data map[string]interface{}) map[string]interface{} {
 	tracks := []map[string]interface{}{}
 	tracksData := getMap(albumData, "tracksV2")
 	trackItems := getSlice(tracksData, "items")
-	if trackItems != nil {
-		for _, item := range trackItems {
-			itemMap, ok := item.(map[string]interface{})
+	for _, item := range trackItems {
+		itemMap, ok := item.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		track := getMap(itemMap, "track")
+		if len(track) == 0 {
+			continue
+		}
+
+		artistsData := getMap(track, "artists")
+		trackArtists := extractArtists(artistsData)
+		trackDurationMs := getFloat64(getMap(track, "duration"), "totalMilliseconds")
+		durationObj := extractDuration(trackDurationMs)
+		durationString := getString(durationObj, "formatted")
+
+		trackArtistNames := []string{}
+		artistIDs := []string{}
+
+		artistItems := getSlice(artistsData, "items")
+		for _, artistItem := range artistItems {
+			artistItemMap, ok := artistItem.(map[string]interface{})
 			if !ok {
 				continue
 			}
-			track := getMap(itemMap, "track")
-			if len(track) == 0 {
-				continue
-			}
-
-			artistsData := getMap(track, "artists")
-			trackArtists := extractArtists(artistsData)
-			trackDurationMs := getFloat64(getMap(track, "duration"), "totalMilliseconds")
-			durationObj := extractDuration(trackDurationMs)
-			durationString := getString(durationObj, "formatted")
-
-			trackArtistNames := []string{}
-			artistIDs := []string{}
-
-			artistItems := getSlice(artistsData, "items")
-			if artistItems != nil {
-				for _, artistItem := range artistItems {
-					artistItemMap, ok := artistItem.(map[string]interface{})
-					if !ok {
-						continue
-					}
-					artistURI := getString(artistItemMap, "uri")
-					if artistURI != "" && strings.Contains(artistURI, ":") {
-						parts := strings.Split(artistURI, ":")
-						if len(parts) > 0 {
-							artistID := parts[len(parts)-1]
-							if artistID != "" {
-								artistIDs = append(artistIDs, artistID)
-							}
-						}
+			artistURI := getString(artistItemMap, "uri")
+			if artistURI != "" && strings.Contains(artistURI, ":") {
+				parts := strings.Split(artistURI, ":")
+				if len(parts) > 0 {
+					artistID := parts[len(parts)-1]
+					if artistID != "" {
+						artistIDs = append(artistIDs, artistID)
 					}
 				}
 			}
-
-			for _, artist := range trackArtists {
-				trackArtistNames = append(trackArtistNames, getString(artist, "name"))
-			}
-			trackArtistsString := strings.Join(trackArtistNames, ", ")
-
-			trackURI := getString(track, "uri")
-			trackID := ""
-			if strings.Contains(trackURI, ":") {
-				parts := strings.Split(trackURI, ":")
-				trackID = parts[len(parts)-1]
-			}
-
-			contentRating := getMap(track, "contentRating")
-			isExplicit := getString(contentRating, "label") == "EXPLICIT"
-
-			discNumber := int(getFloat64(track, "discNumber"))
-			if discNumber == 0 {
-				discNumber = 1
-			}
-
-			trackInfo := map[string]interface{}{
-				"id":          trackID,
-				"name":        getString(track, "name"),
-				"artists":     trackArtistsString,
-				"artistIds":   artistIDs,
-				"duration":    durationString,
-				"plays":       getString(track, "playcount"),
-				"is_explicit": isExplicit,
-				"disc_number": discNumber,
-			}
-			tracks = append(tracks, trackInfo)
 		}
+
+		for _, artist := range trackArtists {
+			trackArtistNames = append(trackArtistNames, getString(artist, "name"))
+		}
+		trackArtistsString := strings.Join(trackArtistNames, ", ")
+
+		trackURI := getString(track, "uri")
+		trackID := ""
+		if strings.Contains(trackURI, ":") {
+			parts := strings.Split(trackURI, ":")
+			trackID = parts[len(parts)-1]
+		}
+
+		contentRating := getMap(track, "contentRating")
+		isExplicit := getString(contentRating, "label") == "EXPLICIT"
+
+		discNumber := int(getFloat64(track, "discNumber"))
+		if discNumber == 0 {
+			discNumber = 1
+		}
+
+		trackInfo := map[string]interface{}{
+			"id":          trackID,
+			"name":        getString(track, "name"),
+			"artists":     trackArtistsString,
+			"artistIds":   artistIDs,
+			"duration":    durationString,
+			"plays":       getString(track, "playcount"),
+			"is_explicit": isExplicit,
+			"disc_number": discNumber,
+		}
+		tracks = append(tracks, trackInfo)
 	}
 
 	dateInfo := getMap(albumData, "date")
@@ -989,10 +981,10 @@ func FilterPlaylist(data map[string]interface{}) map[string]interface{} {
 	var cover interface{}
 	if len(imagesData) > 0 {
 		imageItems := getSlice(imagesData, "items")
-		if imageItems != nil && len(imageItems) > 0 {
+		if len(imageItems) > 0 {
 			if firstImage, ok := imageItems[0].(map[string]interface{}); ok {
 				firstSources := getSlice(firstImage, "sources")
-				if firstSources != nil && len(firstSources) > 0 {
+				if len(firstSources) > 0 {
 					if firstSource, ok := firstSources[0].(map[string]interface{}); ok {
 						sourceURL := getString(firstSource, "url")
 						if sourceURL != "" {
@@ -1004,7 +996,7 @@ func FilterPlaylist(data map[string]interface{}) map[string]interface{} {
 		}
 		if cover == nil {
 			imageSources := getSlice(imagesData, "sources")
-			if imageSources != nil && len(imageSources) > 0 {
+			if len(imageSources) > 0 {
 				if firstSource, ok := imageSources[0].(map[string]interface{}); ok {
 					sourceURL := getString(firstSource, "url")
 					if sourceURL != "" {
@@ -1018,138 +1010,133 @@ func FilterPlaylist(data map[string]interface{}) map[string]interface{} {
 	tracks := []map[string]interface{}{}
 	content := getMap(playlistData, "content")
 	contentItems := getSlice(content, "items")
-	if contentItems != nil {
-		for _, item := range contentItems {
-			itemMap, ok := item.(map[string]interface{})
+	for _, item := range contentItems {
+		itemMap, ok := item.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		trackData := getMap(getMap(itemMap, "itemV2"), "data")
+		if len(trackData) == 0 {
+			continue
+		}
+
+		var rank interface{}
+		var status interface{}
+		attributes := getSlice(itemMap, "attributes")
+
+		for _, attr := range attributes {
+			attrMap, ok := attr.(map[string]interface{})
 			if !ok {
 				continue
 			}
-			trackData := getMap(getMap(itemMap, "itemV2"), "data")
-			if len(trackData) == 0 {
-				continue
+			key := getString(attrMap, "key")
+			if key == "rank" {
+				rank = getString(attrMap, "value")
+			} else if key == "status" {
+				status = getString(attrMap, "value")
 			}
-
-			var rank interface{}
-			var status interface{}
-			attributes := getSlice(itemMap, "attributes")
-			if attributes != nil {
-				for _, attr := range attributes {
-					attrMap, ok := attr.(map[string]interface{})
-					if !ok {
-						continue
-					}
-					key := getString(attrMap, "key")
-					if key == "rank" {
-						rank = getString(attrMap, "value")
-					} else if key == "status" {
-						status = getString(attrMap, "value")
-					}
-				}
-			}
-
-			artistsData := getMap(trackData, "artists")
-			trackArtists := extractArtists(artistsData)
-			trackArtistNames := []string{}
-			artistIDs := []string{}
-
-			artistItems := getSlice(artistsData, "items")
-			if artistItems != nil {
-				for _, artistItem := range artistItems {
-					artistItemMap, ok := artistItem.(map[string]interface{})
-					if !ok {
-						continue
-					}
-					artistURI := getString(artistItemMap, "uri")
-					if artistURI != "" && strings.Contains(artistURI, ":") {
-						parts := strings.Split(artistURI, ":")
-						if len(parts) > 0 {
-							artistID := parts[len(parts)-1]
-							if artistID != "" {
-								artistIDs = append(artistIDs, artistID)
-							}
-						}
-					}
-				}
-			}
-
-			for _, artist := range trackArtists {
-				trackArtistNames = append(trackArtistNames, getString(artist, "name"))
-			}
-			artistsString := strings.Join(trackArtistNames, ", ")
-
-			trackDurationMs := getFloat64(getMap(trackData, "trackDuration"), "totalMilliseconds")
-			durationObj := extractDuration(trackDurationMs)
-			durationString := getString(durationObj, "formatted")
-
-			trackURI := getString(trackData, "uri")
-			trackID := getString(trackData, "id")
-			if trackID == "" {
-				if strings.Contains(trackURI, ":") {
-					parts := strings.Split(trackURI, ":")
-					trackID = parts[len(parts)-1]
-				}
-			}
-
-			albumData := getMap(trackData, "albumOfTrack")
-			albumName := ""
-			albumID := ""
-			albumArtistsString := ""
-			var trackCover interface{}
-
-			if len(albumData) > 0 {
-				albumName = getString(albumData, "name")
-				albumURI := getString(albumData, "uri")
-				if strings.Contains(albumURI, ":") {
-					parts := strings.Split(albumURI, ":")
-					albumID = parts[len(parts)-1]
-				}
-				coverObj := extractCoverImage(getMap(albumData, "coverArt"))
-				if coverObj != nil {
-
-					trackCover = getString(coverObj, "small")
-					if trackCover == "" {
-						trackCover = getString(coverObj, "medium")
-					}
-					if trackCover == "" {
-						trackCover = getString(coverObj, "large")
-					}
-				}
-
-				albumArtists := extractArtists(getMap(albumData, "artists"))
-				if len(albumArtists) > 0 {
-					albumArtistNames := []string{}
-					for _, artist := range albumArtists {
-						albumArtistNames = append(albumArtistNames, getString(artist, "name"))
-					}
-					albumArtistsString = strings.Join(albumArtistNames, ", ")
-				}
-			}
-
-			contentRating := getMap(trackData, "contentRating")
-			isExplicit := getString(contentRating, "label") == "EXPLICIT"
-
-			trackName := getString(trackData, "name")
-			if trackName == "" {
-				continue
-			}
-
-			trackInfo := map[string]interface{}{
-				"id":          trackID,
-				"cover":       trackCover,
-				"title":       trackName,
-				"artist":      artistsString,
-				"artistIds":   artistIDs,
-				"plays":       rank,
-				"status":      status,
-				"album":       albumName,
-				"albumArtist": albumArtistsString,
-				"albumId":     albumID,
-				"duration":    durationString,
-				"is_explicit": isExplicit,
-				"disc_number": int(getFloat64(trackData, "discNumber")),
-			}
-			tracks = append(tracks, trackInfo)
 		}
+
+		artistsData := getMap(trackData, "artists")
+		trackArtists := extractArtists(artistsData)
+		trackArtistNames := []string{}
+		artistIDs := []string{}
+
+		artistItems := getSlice(artistsData, "items")
+		for _, artistItem := range artistItems {
+			artistItemMap, ok := artistItem.(map[string]interface{})
+			if !ok {
+				continue
+			}
+			artistURI := getString(artistItemMap, "uri")
+			if artistURI != "" && strings.Contains(artistURI, ":") {
+				parts := strings.Split(artistURI, ":")
+				if len(parts) > 0 {
+					artistID := parts[len(parts)-1]
+					if artistID != "" {
+						artistIDs = append(artistIDs, artistID)
+					}
+				}
+			}
+		}
+
+		for _, artist := range trackArtists {
+			trackArtistNames = append(trackArtistNames, getString(artist, "name"))
+		}
+		artistsString := strings.Join(trackArtistNames, ", ")
+
+		trackDurationMs := getFloat64(getMap(trackData, "trackDuration"), "totalMilliseconds")
+		durationObj := extractDuration(trackDurationMs)
+		durationString := getString(durationObj, "formatted")
+
+		trackURI := getString(trackData, "uri")
+		trackID := getString(trackData, "id")
+		if trackID == "" {
+			if strings.Contains(trackURI, ":") {
+				parts := strings.Split(trackURI, ":")
+				trackID = parts[len(parts)-1]
+			}
+		}
+
+		albumData := getMap(trackData, "albumOfTrack")
+		albumName := ""
+		albumID := ""
+		albumArtistsString := ""
+		var trackCover interface{}
+
+		if len(albumData) > 0 {
+			albumName = getString(albumData, "name")
+			albumURI := getString(albumData, "uri")
+			if strings.Contains(albumURI, ":") {
+				parts := strings.Split(albumURI, ":")
+				albumID = parts[len(parts)-1]
+			}
+			coverObj := extractCoverImage(getMap(albumData, "coverArt"))
+			if coverObj != nil {
+
+				trackCover = getString(coverObj, "small")
+				if trackCover == "" {
+					trackCover = getString(coverObj, "medium")
+				}
+				if trackCover == "" {
+					trackCover = getString(coverObj, "large")
+				}
+			}
+
+			albumArtists := extractArtists(getMap(albumData, "artists"))
+			if len(albumArtists) > 0 {
+				albumArtistNames := []string{}
+				for _, artist := range albumArtists {
+					albumArtistNames = append(albumArtistNames, getString(artist, "name"))
+				}
+				albumArtistsString = strings.Join(albumArtistNames, ", ")
+			}
+		}
+
+		contentRating := getMap(trackData, "contentRating")
+		isExplicit := getString(contentRating, "label") == "EXPLICIT"
+
+		trackName := getString(trackData, "name")
+		if trackName == "" {
+			continue
+		}
+
+		trackInfo := map[string]interface{}{
+			"id":          trackID,
+			"cover":       trackCover,
+			"title":       trackName,
+			"artist":      artistsString,
+			"artistIds":   artistIDs,
+			"plays":       rank,
+			"status":      status,
+			"album":       albumName,
+			"albumArtist": albumArtistsString,
+			"albumId":     albumID,
+			"duration":    durationString,
+			"is_explicit": isExplicit,
+			"disc_number": int(getFloat64(trackData, "discNumber")),
+		}
+		tracks = append(tracks, trackInfo)
 	}
 
 	followersData, exists := playlistData["followers"]
@@ -1193,8 +1180,8 @@ func FilterPlaylist(data map[string]interface{}) map[string]interface{} {
 	}
 
 	return filtered
-}
 
+}
 func extractRelease(release map[string]interface{}) map[string]interface{} {
 	if len(release) == 0 {
 		return nil
@@ -1260,36 +1247,34 @@ func extractRelease(release map[string]interface{}) map[string]interface{} {
 func extractDiscographyItems(itemsData map[string]interface{}) []map[string]interface{} {
 	items := []map[string]interface{}{}
 	dataItems := getSlice(itemsData, "items")
-	if dataItems != nil {
-		for _, item := range dataItems {
-			itemMap, ok := item.(map[string]interface{})
-			if !ok {
-				continue
-			}
-			releases := getMap(itemMap, "releases")
-			var release map[string]interface{}
-			if len(releases) > 0 {
-				releaseItems := getSlice(releases, "items")
-				if releaseItems != nil && len(releaseItems) > 0 {
-					if releaseMap, ok := releaseItems[0].(map[string]interface{}); ok {
-						release = releaseMap
-					}
+	for _, item := range dataItems {
+		itemMap, ok := item.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		releases := getMap(itemMap, "releases")
+		var release map[string]interface{}
+		if len(releases) > 0 {
+			releaseItems := getSlice(releases, "items")
+			if len(releaseItems) > 0 {
+				if releaseMap, ok := releaseItems[0].(map[string]interface{}); ok {
+					release = releaseMap
 				}
-			} else {
-				release = getMap(itemMap, "album")
 			}
+		} else {
+			release = getMap(itemMap, "album")
+		}
 
-			if len(release) > 0 {
-				extracted := extractRelease(release)
-				if extracted != nil {
-					items = append(items, extracted)
-				}
+		if len(release) > 0 {
+			extracted := extractRelease(release)
+			if extracted != nil {
+				items = append(items, extracted)
 			}
 		}
 	}
+
 	return items
 }
-
 func stripHTMLTags(s string) string {
 	re := regexp.MustCompile(`<[^>]*>`)
 	return re.ReplaceAllString(s, "")
@@ -1328,7 +1313,7 @@ func FilterArtist(data map[string]interface{}) map[string]interface{} {
 		headerData := getMap(headerImageData, "data")
 		if len(headerData) > 0 {
 			sources := getSlice(headerData, "sources")
-			if sources != nil && len(sources) > 0 {
+			if len(sources) > 0 {
 				if firstSource, ok := sources[0].(map[string]interface{}); ok {
 					headerImage = getString(firstSource, "url")
 				}
@@ -1374,19 +1359,17 @@ func FilterArtist(data map[string]interface{}) map[string]interface{} {
 	gallery := []interface{}{}
 	if len(galleryData) > 0 {
 		galleryItems := getSlice(galleryData, "items")
-		if galleryItems != nil {
-			for _, item := range galleryItems {
-				itemMap, ok := item.(map[string]interface{})
-				if !ok {
-					continue
-				}
-				sources := getSlice(itemMap, "sources")
-				if sources != nil && len(sources) > 0 {
-					if firstSource, ok := sources[0].(map[string]interface{}); ok {
-						galleryURL := getString(firstSource, "url")
-						if galleryURL != "" {
-							gallery = append(gallery, galleryURL)
-						}
+		for _, item := range galleryItems {
+			itemMap, ok := item.(map[string]interface{})
+			if !ok {
+				continue
+			}
+			sources := getSlice(itemMap, "sources")
+			if len(sources) > 0 {
+				if firstSource, ok := sources[0].(map[string]interface{}); ok {
+					galleryURL := getString(firstSource, "url")
+					if galleryURL != "" {
+						gallery = append(gallery, galleryURL)
 					}
 				}
 			}
@@ -1443,101 +1426,99 @@ func FilterSearch(data map[string]interface{}) map[string]interface{} {
 		tracksData = getMap(searchData, "tracks")
 	}
 	trackItems := getSlice(tracksData, "items")
-	if trackItems != nil {
-		for _, item := range trackItems {
-			itemMap, ok := item.(map[string]interface{})
-			if !ok {
-				continue
-			}
-			var track map[string]interface{}
-			if itemData, exists := itemMap["item"]; exists {
-				itemDataMap, ok := itemData.(map[string]interface{})
-				if ok {
-					track = getMap(itemDataMap, "data")
-				}
-			} else if trackData, exists := itemMap["track"]; exists {
-				if trackMap, ok := trackData.(map[string]interface{}); ok {
-					track = trackMap
-				}
-			}
-
-			if len(track) == 0 {
-				continue
-			}
-
-			trackArtists := extractArtists(getMap(track, "artists"))
-			trackDurationMs := getFloat64(getMap(track, "duration"), "totalMilliseconds")
-			if trackDurationMs == 0 {
-				trackDurationMs = getFloat64(getMap(track, "trackDuration"), "totalMilliseconds")
-			}
-			trackDuration := extractDuration(trackDurationMs)
-
-			albumData := getMap(track, "albumOfTrack")
-			var albumInfo map[string]interface{}
-			if len(albumData) > 0 {
-				albumURI := getString(albumData, "uri")
-				albumID := getString(albumData, "id")
-				if albumID == "" {
-					if strings.Contains(albumURI, ":") {
-						parts := strings.Split(albumURI, ":")
-						albumID = parts[len(parts)-1]
-					}
-				}
-				albumInfo = map[string]interface{}{
-					"name": getString(albumData, "name"),
-					"uri":  albumURI,
-					"id":   albumID,
-				}
-			}
-
-			trackURI := getString(track, "uri")
-			trackID := getString(track, "id")
-			if trackID == "" {
-				if strings.Contains(trackURI, ":") {
-					parts := strings.Split(trackURI, ":")
-					trackID = parts[len(parts)-1]
-				}
-			}
-
-			coverObj := extractCoverImage(getMap(albumData, "coverArt"))
-			var cover interface{}
-			if coverObj != nil {
-				cover = getString(coverObj, "medium")
-			}
-
-			trackName := getString(track, "name")
-			if trackName == "" {
-				continue
-			}
-
-			trackArtistNames := []string{}
-			for _, artist := range trackArtists {
-				trackArtistNames = append(trackArtistNames, getString(artist, "name"))
-			}
-			trackArtistsString := strings.Join(trackArtistNames, ", ")
-
-			durationString := getString(trackDuration, "formatted")
-
-			albumName := ""
-			if albumInfo != nil {
-				albumName = getString(albumInfo, "name")
-			}
-
-			contentRating := getMap(track, "contentRating")
-			isExplicit := getString(contentRating, "label") == "EXPLICIT"
-
-			trackResults := results["tracks"].([]map[string]interface{})
-			trackResults = append(trackResults, map[string]interface{}{
-				"id":          trackID,
-				"name":        trackName,
-				"artists":     trackArtistsString,
-				"album":       albumName,
-				"duration":    durationString,
-				"cover":       cover,
-				"is_explicit": isExplicit,
-			})
-			results["tracks"] = trackResults
+	for _, item := range trackItems {
+		itemMap, ok := item.(map[string]interface{})
+		if !ok {
+			continue
 		}
+		var track map[string]interface{}
+		if itemData, exists := itemMap["item"]; exists {
+			itemDataMap, ok := itemData.(map[string]interface{})
+			if ok {
+				track = getMap(itemDataMap, "data")
+			}
+		} else if trackData, exists := itemMap["track"]; exists {
+			if trackMap, ok := trackData.(map[string]interface{}); ok {
+				track = trackMap
+			}
+		}
+
+		if len(track) == 0 {
+			continue
+		}
+
+		trackArtists := extractArtists(getMap(track, "artists"))
+		trackDurationMs := getFloat64(getMap(track, "duration"), "totalMilliseconds")
+		if trackDurationMs == 0 {
+			trackDurationMs = getFloat64(getMap(track, "trackDuration"), "totalMilliseconds")
+		}
+		trackDuration := extractDuration(trackDurationMs)
+
+		albumData := getMap(track, "albumOfTrack")
+		var albumInfo map[string]interface{}
+		if len(albumData) > 0 {
+			albumURI := getString(albumData, "uri")
+			albumID := getString(albumData, "id")
+			if albumID == "" {
+				if strings.Contains(albumURI, ":") {
+					parts := strings.Split(albumURI, ":")
+					albumID = parts[len(parts)-1]
+				}
+			}
+			albumInfo = map[string]interface{}{
+				"name": getString(albumData, "name"),
+				"uri":  albumURI,
+				"id":   albumID,
+			}
+		}
+
+		trackURI := getString(track, "uri")
+		trackID := getString(track, "id")
+		if trackID == "" {
+			if strings.Contains(trackURI, ":") {
+				parts := strings.Split(trackURI, ":")
+				trackID = parts[len(parts)-1]
+			}
+		}
+
+		coverObj := extractCoverImage(getMap(albumData, "coverArt"))
+		var cover interface{}
+		if coverObj != nil {
+			cover = getString(coverObj, "medium")
+		}
+
+		trackName := getString(track, "name")
+		if trackName == "" {
+			continue
+		}
+
+		trackArtistNames := []string{}
+		for _, artist := range trackArtists {
+			trackArtistNames = append(trackArtistNames, getString(artist, "name"))
+		}
+		trackArtistsString := strings.Join(trackArtistNames, ", ")
+
+		durationString := getString(trackDuration, "formatted")
+
+		albumName := ""
+		if albumInfo != nil {
+			albumName = getString(albumInfo, "name")
+		}
+
+		contentRating := getMap(track, "contentRating")
+		isExplicit := getString(contentRating, "label") == "EXPLICIT"
+
+		trackResults := results["tracks"].([]map[string]interface{})
+		trackResults = append(trackResults, map[string]interface{}{
+			"id":          trackID,
+			"name":        trackName,
+			"artists":     trackArtistsString,
+			"album":       albumName,
+			"duration":    durationString,
+			"cover":       cover,
+			"is_explicit": isExplicit,
+		})
+		results["tracks"] = trackResults
 	}
 
 	albumsData := getMap(searchData, "albumsV2")
@@ -1545,77 +1526,75 @@ func FilterSearch(data map[string]interface{}) map[string]interface{} {
 		albumsData = getMap(searchData, "albums")
 	}
 	albumItems := getSlice(albumsData, "items")
-	if albumItems != nil {
-		for _, item := range albumItems {
-			itemMap, ok := item.(map[string]interface{})
-			if !ok {
-				continue
-			}
-			var album map[string]interface{}
-			if itemData, exists := itemMap["data"]; exists {
-				if albumMap, ok := itemData.(map[string]interface{}); ok {
-					album = albumMap
-				}
-			} else if albumData, exists := itemMap["album"]; exists {
-				if albumMap, ok := albumData.(map[string]interface{}); ok {
-					album = albumMap
-				}
-			}
-
-			if len(album) == 0 {
-				continue
-			}
-
-			albumArtists := extractArtists(getMap(album, "artists"))
-			albumURI := getString(album, "uri")
-			albumID := getString(album, "id")
-			if albumID == "" {
-				if strings.Contains(albumURI, ":") {
-					parts := strings.Split(albumURI, ":")
-					albumID = parts[len(parts)-1]
-				}
-			}
-
-			coverObj := extractCoverImage(getMap(album, "coverArt"))
-			var cover interface{}
-			if coverObj != nil {
-				cover = getString(coverObj, "medium")
-			}
-
-			albumArtistNames := []string{}
-			for _, artist := range albumArtists {
-				albumArtistNames = append(albumArtistNames, getString(artist, "name"))
-			}
-			albumArtistsString := strings.Join(albumArtistNames, ", ")
-
-			dateInfo := getMap(album, "date")
-			var year interface{}
-			if len(dateInfo) > 0 {
-				if yearVal, exists := dateInfo["year"]; exists {
-					year = yearVal
-				}
-			}
-
-			albumName := getString(album, "name")
-			if albumName == "" || albumArtistsString == "" {
-				continue
-			}
-
-			albumResult := map[string]interface{}{
-				"id":      albumID,
-				"name":    albumName,
-				"artists": albumArtistsString,
-				"cover":   cover,
-			}
-
-			if year != nil {
-				albumResult["year"] = year
-			}
-
-			albumResults := results["albums"].([]map[string]interface{})
-			albumResults = append(albumResults, albumResult)
-			results["albums"] = albumResults
+	for _, item := range albumItems {
+		itemMap, ok := item.(map[string]interface{})
+		if !ok {
+			continue
 		}
+		var album map[string]interface{}
+		if itemData, exists := itemMap["data"]; exists {
+			if albumMap, ok := itemData.(map[string]interface{}); ok {
+				album = albumMap
+			}
+		} else if albumData, exists := itemMap["album"]; exists {
+			if albumMap, ok := albumData.(map[string]interface{}); ok {
+				album = albumMap
+			}
+		}
+
+		if len(album) == 0 {
+			continue
+		}
+
+		albumArtists := extractArtists(getMap(album, "artists"))
+		albumURI := getString(album, "uri")
+		albumID := getString(album, "id")
+		if albumID == "" {
+			if strings.Contains(albumURI, ":") {
+				parts := strings.Split(albumURI, ":")
+				albumID = parts[len(parts)-1]
+			}
+		}
+
+		coverObj := extractCoverImage(getMap(album, "coverArt"))
+		var cover interface{}
+		if coverObj != nil {
+			cover = getString(coverObj, "medium")
+		}
+
+		albumArtistNames := []string{}
+		for _, artist := range albumArtists {
+			albumArtistNames = append(albumArtistNames, getString(artist, "name"))
+		}
+		albumArtistsString := strings.Join(albumArtistNames, ", ")
+
+		dateInfo := getMap(album, "date")
+		var year interface{}
+		if len(dateInfo) > 0 {
+			if yearVal, exists := dateInfo["year"]; exists {
+				year = yearVal
+			}
+		}
+
+		albumName := getString(album, "name")
+		if albumName == "" || albumArtistsString == "" {
+			continue
+		}
+
+		albumResult := map[string]interface{}{
+			"id":      albumID,
+			"name":    albumName,
+			"artists": albumArtistsString,
+			"cover":   cover,
+		}
+
+		if year != nil {
+			albumResult["year"] = year
+		}
+
+		albumResults := results["albums"].([]map[string]interface{})
+		albumResults = append(albumResults, albumResult)
+		results["albums"] = albumResults
 	}
 
 	artistsData := getMap(searchData, "artistsV2")
@@ -1623,64 +1602,62 @@ func FilterSearch(data map[string]interface{}) map[string]interface{} {
 		artistsData = getMap(searchData, "artists")
 	}
 	artistItems := getSlice(artistsData, "items")
-	if artistItems != nil {
-		for _, item := range artistItems {
-			itemMap, ok := item.(map[string]interface{})
-			if !ok {
-				continue
-			}
-			var artist map[string]interface{}
-			if itemData, exists := itemMap["data"]; exists {
-				if artistMap, ok := itemData.(map[string]interface{}); ok {
-					artist = artistMap
-				}
-			} else if artistData, exists := itemMap["artist"]; exists {
-				if artistMap, ok := artistData.(map[string]interface{}); ok {
-					artist = artistMap
-				}
-			}
-
-			if len(artist) == 0 {
-				continue
-			}
-
-			artistURI := getString(artist, "uri")
-			artistID := ""
-			if strings.Contains(artistURI, ":") {
-				parts := strings.Split(artistURI, ":")
-				artistID = parts[len(parts)-1]
-			}
-
-			coverObj := extractCoverImage(getMap(artist, "visualIdentity"))
-			if coverObj == nil {
-				visuals := getMap(artist, "visuals")
-				if len(visuals) > 0 {
-					coverObj = extractCoverImage(getMap(visuals, "avatarImage"))
-				}
-			}
-
-			var cover interface{}
-			if coverObj != nil {
-				cover = getString(coverObj, "medium")
-			}
-
-			artistName := getString(getMap(artist, "profile"), "name")
-			if artistName == "" {
-				artistName = getString(artist, "name")
-			}
-
-			if artistName == "" {
-				continue
-			}
-
-			artistResults := results["artists"].([]map[string]interface{})
-			artistResults = append(artistResults, map[string]interface{}{
-				"id":    artistID,
-				"name":  artistName,
-				"cover": cover,
-			})
-			results["artists"] = artistResults
+	for _, item := range artistItems {
+		itemMap, ok := item.(map[string]interface{})
+		if !ok {
+			continue
 		}
+		var artist map[string]interface{}
+		if itemData, exists := itemMap["data"]; exists {
+			if artistMap, ok := itemData.(map[string]interface{}); ok {
+				artist = artistMap
+			}
+		} else if artistData, exists := itemMap["artist"]; exists {
+			if artistMap, ok := artistData.(map[string]interface{}); ok {
+				artist = artistMap
+			}
+		}
+
+		if len(artist) == 0 {
+			continue
+		}
+
+		artistURI := getString(artist, "uri")
+		artistID := ""
+		if strings.Contains(artistURI, ":") {
+			parts := strings.Split(artistURI, ":")
+			artistID = parts[len(parts)-1]
+		}
+
+		coverObj := extractCoverImage(getMap(artist, "visualIdentity"))
+		if coverObj == nil {
+			visuals := getMap(artist, "visuals")
+			if len(visuals) > 0 {
+				coverObj = extractCoverImage(getMap(visuals, "avatarImage"))
+			}
+		}
+
+		var cover interface{}
+		if coverObj != nil {
+			cover = getString(coverObj, "medium")
+		}
+
+		artistName := getString(getMap(artist, "profile"), "name")
+		if artistName == "" {
+			artistName = getString(artist, "name")
+		}
+
+		if artistName == "" {
+			continue
+		}
+
+		artistResults := results["artists"].([]map[string]interface{})
+		artistResults = append(artistResults, map[string]interface{}{
+			"id":    artistID,
+			"name":  artistName,
+			"cover": cover,
+		})
+		results["artists"] = artistResults
 	}
 
 	playlistsData := getMap(searchData, "playlistsV2")
@@ -1688,81 +1665,79 @@ func FilterSearch(data map[string]interface{}) map[string]interface{} {
 		playlistsData = getMap(searchData, "playlists")
 	}
 	playlistItems := getSlice(playlistsData, "items")
-	if playlistItems != nil {
-		for _, item := range playlistItems {
-			itemMap, ok := item.(map[string]interface{})
-			if !ok {
-				continue
+	for _, item := range playlistItems {
+		itemMap, ok := item.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		var playlist map[string]interface{}
+		if itemData, exists := itemMap["data"]; exists {
+			if playlistMap, ok := itemData.(map[string]interface{}); ok {
+				playlist = playlistMap
 			}
-			var playlist map[string]interface{}
-			if itemData, exists := itemMap["data"]; exists {
-				if playlistMap, ok := itemData.(map[string]interface{}); ok {
-					playlist = playlistMap
-				}
-			} else if playlistData, exists := itemMap["playlist"]; exists {
-				if playlistMap, ok := playlistData.(map[string]interface{}); ok {
-					playlist = playlistMap
-				}
+		} else if playlistData, exists := itemMap["playlist"]; exists {
+			if playlistMap, ok := playlistData.(map[string]interface{}); ok {
+				playlist = playlistMap
 			}
+		}
 
-			if len(playlist) == 0 {
-				continue
-			}
+		if len(playlist) == 0 {
+			continue
+		}
 
-			playlistURI := getString(playlist, "uri")
-			playlistID := ""
-			if strings.Contains(playlistURI, ":") {
-				parts := strings.Split(playlistURI, ":")
-				playlistID = parts[len(parts)-1]
-			}
+		playlistURI := getString(playlist, "uri")
+		playlistID := ""
+		if strings.Contains(playlistURI, ":") {
+			parts := strings.Split(playlistURI, ":")
+			playlistID = parts[len(parts)-1]
+		}
 
-			playlistImages := getMap(playlist, "images")
-			if len(playlistImages) == 0 {
-				playlistImages = getMap(playlist, "imagesV2")
-			}
-			var playlistCoverObj map[string]interface{}
-			if len(playlistImages) > 0 {
-				imageItems := getSlice(playlistImages, "items")
-				if imageItems != nil && len(imageItems) > 0 {
-					if firstImage, ok := imageItems[0].(map[string]interface{}); ok {
-						firstSources := getSlice(firstImage, "sources")
-						if firstSources != nil {
-							playlistCoverObj = extractCoverImage(map[string]interface{}{"sources": firstSources})
-						}
+		playlistImages := getMap(playlist, "images")
+		if len(playlistImages) == 0 {
+			playlistImages = getMap(playlist, "imagesV2")
+		}
+		var playlistCoverObj map[string]interface{}
+		if len(playlistImages) > 0 {
+			imageItems := getSlice(playlistImages, "items")
+			if len(imageItems) > 0 {
+				if firstImage, ok := imageItems[0].(map[string]interface{}); ok {
+					firstSources := getSlice(firstImage, "sources")
+					if firstSources != nil {
+						playlistCoverObj = extractCoverImage(map[string]interface{}{"sources": firstSources})
 					}
 				}
-				if playlistCoverObj == nil {
-					playlistCoverObj = extractCoverImage(playlistImages)
-				}
 			}
-
-			var playlistCover interface{}
-			if playlistCoverObj != nil {
-				playlistCover = getString(playlistCoverObj, "medium")
+			if playlistCoverObj == nil {
+				playlistCoverObj = extractCoverImage(playlistImages)
 			}
-
-			ownerData := getMap(getMap(playlist, "ownerV2"), "data")
-			ownerName := getString(ownerData, "name")
-
-			playlistName := getString(playlist, "name")
-			if playlistName == "" {
-				continue
-			}
-
-			playlistResult := map[string]interface{}{
-				"id":    playlistID,
-				"name":  playlistName,
-				"cover": playlistCover,
-			}
-
-			if ownerName != "" {
-				playlistResult["owner"] = ownerName
-			}
-
-			playlistResults := results["playlists"].([]map[string]interface{})
-			playlistResults = append(playlistResults, playlistResult)
-			results["playlists"] = playlistResults
 		}
+
+		var playlistCover interface{}
+		if playlistCoverObj != nil {
+			playlistCover = getString(playlistCoverObj, "medium")
+		}
+
+		ownerData := getMap(getMap(playlist, "ownerV2"), "data")
+		ownerName := getString(ownerData, "name")
+
+		playlistName := getString(playlist, "name")
+		if playlistName == "" {
+			continue
+		}
+
+		playlistResult := map[string]interface{}{
+			"id":    playlistID,
+			"name":  playlistName,
+			"cover": playlistCover,
+		}
+
+		if ownerName != "" {
+			playlistResult["owner"] = ownerName
+		}
+
+		playlistResults := results["playlists"].([]map[string]interface{})
+		playlistResults = append(playlistResults, playlistResult)
+		results["playlists"] = playlistResults
 	}
 
 	tracks := results["tracks"].([]map[string]interface{})

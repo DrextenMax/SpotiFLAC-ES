@@ -41,7 +41,7 @@ func (a *App) getFirstArtist(artistString string) string {
 func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
 
-	if err := backend.InitHistoryDB("SpotiFLAC"); err != nil {
+	if err := backend.InitHistoryDB("SpotiFLAG&MP3"); err != nil {
 		fmt.Printf("Failed to init history DB: %v\n", err)
 	}
 }
@@ -464,7 +464,13 @@ func (a *App) DownloadTrack(req DownloadRequest) (DownloadResponse, error) {
 		default:
 		}
 	}
-
+	settings, _ := a.LoadSettings()
+	autoConvert := true
+	if settings != nil {
+		if v, ok := settings["autoConvertToMp3"].(bool); ok {
+			autoConvert = v
+		}
+	}
 	message := "Download completed successfully"
 	if alreadyExists {
 		message = "File already exists"
@@ -475,8 +481,39 @@ func (a *App) DownloadTrack(req DownloadRequest) (DownloadResponse, error) {
 			finalSize := float64(fileInfo.Size()) / (1024 * 1024)
 			backend.CompleteDownloadItem(itemID, filename, finalSize)
 		} else {
-
 			backend.CompleteDownloadItem(itemID, filename, 0)
+		}
+
+		// Conversión automática a MP3 (solo si está activada y el archivo no es ya MP3)
+		if autoConvert {
+			go func(fPath string) {
+				ext := strings.ToLower(filepath.Ext(fPath))
+				if ext == ".mp3" {
+					return
+				}
+
+				convReq := ConvertAudioRequest{
+					InputFiles:   []string{fPath},
+					OutputFormat: "mp3",
+					Bitrate:      "320k",
+					Codec:        "",
+				}
+
+				results, err := a.ConvertAudio(convReq)
+				if err != nil {
+					fmt.Printf("[AutoConvert] Error converting %s to MP3: %v\n", fPath, err)
+					return
+				}
+
+				if len(results) > 0 && !results[0].Success {
+					fmt.Printf("[AutoConvert] Conversion failed for %s: %s\n", fPath, results[0].Error)
+					return
+				}
+
+				if len(results) > 0 {
+					fmt.Printf("[AutoConvert] Created MP3: %s\n", results[0].OutputFile)
+				}
+			}(filename)
 		}
 
 		go func(fPath, track, artist, album, sID, cover, format string) {
@@ -522,7 +559,7 @@ func (a *App) DownloadTrack(req DownloadRequest) (DownloadResponse, error) {
 				item.Format = "FLAC"
 			}
 
-			backend.AddHistoryItem(item, "SpotiFLAC")
+			backend.AddHistoryItem(item, "SpotiFLAG&MP3")
 		}(filename, req.TrackName, req.ArtistName, req.AlbumName, req.SpotifyID, req.CoverURL, req.AudioFormat)
 	}
 
@@ -632,7 +669,7 @@ func (a *App) ExportFailedDownloads() (string, error) {
 	}
 
 	content := strings.Join(failedItems, "\n")
-	defaultFilename := fmt.Sprintf("SpotiFLAC_%s_Failed.txt", time.Now().Format("20060102_150405"))
+	defaultFilename := fmt.Sprintf("SpotiFLAG&MP3_%s_Failed.txt", time.Now().Format("20060102_150405"))
 
 	path, err := runtime.SaveFileDialog(a.ctx, runtime.SaveDialogOptions{
 		DefaultFilename: defaultFilename,
@@ -666,35 +703,35 @@ func (a *App) Quit() {
 }
 
 func (a *App) GetDownloadHistory() ([]backend.HistoryItem, error) {
-	return backend.GetHistoryItems("SpotiFLAC")
+	return backend.GetHistoryItems("SpotiFLAG&MP3")
 }
 
 func (a *App) ClearDownloadHistory() error {
-	return backend.ClearHistory("SpotiFLAC")
+	return backend.ClearHistory("SpotiFLAG&MP3")
 }
 
 func (a *App) DeleteDownloadHistoryItem(id string) error {
-	return backend.DeleteHistoryItem(id, "SpotiFLAC")
+	return backend.DeleteHistoryItem(id, "SpotiFLAG&MP3")
 }
 
 func (a *App) GetFetchHistory() ([]backend.FetchHistoryItem, error) {
-	return backend.GetFetchHistoryItems("SpotiFLAC")
+	return backend.GetFetchHistoryItems("SpotiFLAG&MP3")
 }
 
 func (a *App) AddFetchHistory(item backend.FetchHistoryItem) error {
-	return backend.AddFetchHistoryItem(item, "SpotiFLAC")
+	return backend.AddFetchHistoryItem(item, "SpotiFLAG&MP3")
 }
 
 func (a *App) ClearFetchHistory() error {
-	return backend.ClearFetchHistory("SpotiFLAC")
+	return backend.ClearFetchHistory("SpotiFLAG&MP3")
 }
 
 func (a *App) DeleteFetchHistoryItem(id string) error {
-	return backend.DeleteFetchHistoryItem(id, "SpotiFLAC")
+	return backend.DeleteFetchHistoryItem(id, "SpotiFLAG&MP3")
 }
 
 func (a *App) ClearFetchHistoryByType(itemType string) error {
-	return backend.ClearFetchHistoryByType(itemType, "SpotiFLAC")
+	return backend.ClearFetchHistoryByType(itemType, "SpotiFLAG&MP3")
 }
 
 func (a *App) AnalyzeTrack(filePath string) (string, error) {

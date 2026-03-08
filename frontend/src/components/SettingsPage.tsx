@@ -98,621 +98,680 @@ export function SettingsPage({ onUnsavedChangesChange, onResetRequest, }: Settin
         toast.success("Settings saved");
         onUnsavedChangesChange?.(false);
     };
-    const handleReset = async () => {
-        const defaultSettings = await resetToDefaultSettings();
-        setTempSettings(defaultSettings);
-        setSavedSettings(defaultSettings);
-        applyThemeMode(defaultSettings.themeMode);
-        applyTheme(defaultSettings.theme);
-        applyFont(defaultSettings.fontFamily);
-        setShowResetConfirm(false);
-        toast.success("Settings reset to default");
-    };
-    const handleBrowseFolder = async () => {
-        try {
-            const selectedPath = await SelectFolder(tempSettings.downloadPath || "");
-            if (selectedPath && selectedPath.trim() !== "") {
-                setTempSettings((prev) => ({ ...prev, downloadPath: selectedPath }));
-            }
-        }
-        catch (error) {
-            console.error("Error selecting folder:", error);
-            toast.error(`Error selecting folder: ${error}`);
-        }
-    };
-    const handleTidalQualityChange = async (value: "LOSSLESS" | "HI_RES_LOSSLESS") => {
-        setTempSettings((prev) => ({ ...prev, tidalQuality: value }));
-    };
-    const handleQobuzQualityChange = (value: "6" | "7" | "27") => {
-        setTempSettings((prev) => ({ ...prev, qobuzQuality: value }));
-    };
-    const handleAutoQualityChange = async (value: "16" | "24") => {
-        setTempSettings((prev) => ({ ...prev, autoQuality: value }));
-    };
-    const [activeTab, setActiveTab] = useState<"general" | "files">("general");
-    return (<div className="space-y-4 h-full flex flex-col">
-      <div className="flex items-center justify-between shrink-0">
-        <h1 className="text-2xl font-bold">Settings</h1>
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={() => setShowResetConfirm(true)} className="gap-1.5">
-            <RotateCcw className="h-4 w-4"/>
-            Reset to Default
-          </Button>
-          <Button onClick={handleSave} className="gap-1.5">
-            <Save className="h-4 w-4"/>
-            Save Changes
-          </Button>
-        </div>
-      </div>
+const handleReset = async () => {
+  const defaultSettings = await resetToDefaultSettings();
+  setTempSettings(defaultSettings);
+  setSavedSettings(defaultSettings);
+  applyThemeMode(defaultSettings.themeMode);
+  applyTheme(defaultSettings.theme);
+  applyFont(defaultSettings.fontFamily);
+  setShowResetConfirm(false);
+  toast.success("Ajustes restablecidos a los valores predeterminados");
+};
 
-      <div className="flex gap-2 border-b shrink-0">
-        <Button variant={activeTab === "general" ? "default" : "ghost"} size="sm" onClick={() => setActiveTab("general")} className="rounded-b-none gap-2">
-          <Settings className="h-4 w-4"/>
-          General
+const handleBrowseFolder = async () => {
+  try {
+    const selectedPath = await SelectFolder(tempSettings.downloadPath || "");
+    if (selectedPath && selectedPath.trim() !== "") {
+      setTempSettings((prev) => ({ ...prev, downloadPath: selectedPath }));
+    }
+  } catch (error) {
+    console.error("Error al seleccionar carpeta:", error);
+    toast.error(`Error al seleccionar carpeta: ${error}`);
+  }
+};
+
+const handleTidalQualityChange = async (
+  value: "LOSSLESS" | "HI_RES_LOSSLESS",
+) => {
+  setTempSettings((prev) => ({ ...prev, tidalQuality: value }));
+};
+
+const handleQobuzQualityChange = (value: "6" | "7" | "27") => {
+  setTempSettings((prev) => ({ ...prev, qobuzQuality: value }));
+};
+
+const handleAutoQualityChange = async (value: "16" | "24") => {
+  setTempSettings((prev) => ({ ...prev, autoQuality: value }));
+};
+
+const [activeTab, setActiveTab] = useState<"general" | "files">("general");
+
+return (
+  <div className="space-y-4 h-full flex flex-col">
+    <div className="flex items-center justify-between shrink-0">
+      <h1 className="text-2xl font-bold">Ajustes</h1>
+      <div className="flex gap-2">
+        <Button
+          variant="outline"
+          onClick={() => setShowResetConfirm(true)}
+          className="gap-1.5"
+        >
+          <RotateCcw className="h-4 w-4" />
+          Restablecer predeterminado
         </Button>
-        <Button variant={activeTab === "files" ? "default" : "ghost"} size="sm" onClick={() => setActiveTab("files")} className="rounded-b-none gap-2">
-          <FolderCog className="h-4 w-4"/>
-          File Management
+        <Button onClick={handleSave} className="gap-1.5">
+          <Save className="h-4 w-4" />
+          Guardar cambios
         </Button>
       </div>
+    </div>
 
-      <div className="flex-1 overflow-y-auto pt-4">
-        {activeTab === "general" && (<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="download-path">Download Path</Label>
-                <div className="flex gap-2">
-                  <InputWithContext id="download-path" value={tempSettings.downloadPath} onChange={(e) => setTempSettings((prev) => ({
-                ...prev,
-                downloadPath: e.target.value,
-            }))} placeholder="C:\Users\YourUsername\Music"/>
-                  <Button type="button" onClick={handleBrowseFolder} className="gap-1.5">
-                    <FolderOpen className="h-4 w-4"/>
-                    Browse
-                  </Button>
-                </div>
-              </div>
+    <div className="flex gap-2 border-b shrink-0">
+      <Button
+        variant={activeTab === "general" ? "default" : "ghost"}
+        size="sm"
+        onClick={() => setActiveTab("general")}
+        className="rounded-b-none gap-2"
+      >
+        <Settings className="h-4 w-4" />
+        General
+      </Button>
+      <Button
+        variant={activeTab === "files" ? "default" : "ghost"}
+        size="sm"
+        onClick={() => setActiveTab("files")}
+        className="rounded-b-none gap-2"
+      >
+        <FolderCog className="h-4 w-4" />
+        Gestión de archivos
+      </Button>
+    </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="theme-mode">Mode</Label>
-                <Select value={tempSettings.themeMode} onValueChange={(value: "auto" | "light" | "dark") => setTempSettings((prev) => ({ ...prev, themeMode: value }))}>
-                  <SelectTrigger id="theme-mode">
-                    <SelectValue placeholder="Select theme mode"/>
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="auto">Auto</SelectItem>
-                    <SelectItem value="light">Light</SelectItem>
-                    <SelectItem value="dark">Dark</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="theme">Accent</Label>
-                <Select value={tempSettings.theme} onValueChange={(value) => setTempSettings((prev) => ({ ...prev, theme: value }))}>
-                  <SelectTrigger id="theme">
-                    <SelectValue placeholder="Select a theme"/>
-                  </SelectTrigger>
-                  <SelectContent>
-                    {themes.map((theme) => (<SelectItem key={theme.name} value={theme.name}>
-                        <span className="flex items-center gap-2">
-                          <span className="w-3 h-3 rounded-full border border-border" style={{
-                    backgroundColor: isDark
-                        ? theme.cssVars.dark.primary
-                        : theme.cssVars.light.primary,
-                }}/>
-                          {theme.label}
-                        </span>
-                      </SelectItem>))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="font">Font</Label>
-                <Select value={tempSettings.fontFamily} onValueChange={(value: FontFamily) => setTempSettings((prev) => ({ ...prev, fontFamily: value }))}>
-                  <SelectTrigger id="font">
-                    <SelectValue placeholder="Select a font"/>
-                  </SelectTrigger>
-                  <SelectContent>
-                    {FONT_OPTIONS.map((font) => (<SelectItem key={font.value} value={font.value}>
-                        <span style={{ fontFamily: font.fontFamily }}>
-                          {font.label}
-                        </span>
-                      </SelectItem>))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="flex items-center gap-3 pt-2">
-                <Switch id="sfx-enabled" checked={tempSettings.sfxEnabled} onCheckedChange={(checked) => setTempSettings((prev) => ({
-                ...prev,
-                sfxEnabled: checked,
-            }))}/>
-                <Label htmlFor="sfx-enabled" className="cursor-pointer text-sm font-normal">
-                  Sound Effects
-                </Label>
+    <div className="flex-1 overflow-y-auto pt-4">
+      {activeTab === "general" && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="download-path">Ruta de descarga</Label>
+              <div className="flex gap-2">
+                <InputWithContext
+                  id="download-path"
+                  value={tempSettings.downloadPath}
+                  onChange={(e) =>
+                    setTempSettings((prev) => ({
+                      ...prev,
+                      downloadPath: e.target.value,
+                    }))
+                  }
+                  placeholder="C:\Users\TuUsuario\Music"
+                />
+                <Button
+                  type="button"
+                  onClick={handleBrowseFolder}
+                  className="gap-1.5"
+                >
+                  <FolderOpen className="h-4 w-4" />
+                  Examinar
+                </Button>
               </div>
             </div>
 
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="downloader">Source</Label>
-                <div className="flex gap-2 flex-wrap">
-                  <Select value={tempSettings.downloader} onValueChange={(value: any) => setTempSettings((prev) => ({
-                ...prev,
-                downloader: value,
-            }))}>
-                    <SelectTrigger id="downloader" className="h-9 w-fit">
-                      <SelectValue placeholder="Select a source"/>
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="auto">Auto</SelectItem>
-                      <SelectItem value="tidal">
-                        <span className="flex items-center">
-                          <TidalIcon />
-                          Tidal
-                        </span>
-                      </SelectItem>
-                      <SelectItem value="qobuz">
-                        <span className="flex items-center">
-                          <QobuzIcon />
-                          Qobuz
-                        </span>
-                      </SelectItem>
-                      <SelectItem value="amazon">
-                        <span className="flex items-center">
-                          <AmazonIcon />
-                          Amazon Music
-                        </span>
-                      </SelectItem>
-                      <SelectItem value="deezer">
-                        <span className="flex items-center">
-                          <DeezerIcon />
-                          Deezer
-                        </span>
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
+            <div className="space-y-2">
+              <Label htmlFor="theme-mode">Modo</Label>
+              <Select
+                value={tempSettings.themeMode}
+                onValueChange={(value: "auto" | "light" | "dark") =>
+                  setTempSettings((prev) => ({ ...prev, themeMode: value }))
+                }
+              >
+                <SelectTrigger id="theme-mode">
+                  <SelectValue placeholder="Selecciona el modo de tema" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="auto">Automático</SelectItem>
+                  <SelectItem value="light">Claro</SelectItem>
+                  <SelectItem value="dark">Oscuro</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
-                  {tempSettings.downloader === "auto" && (<>
-                      <Select value={tempSettings.autoOrder || "tidal-qobuz-amazon"} onValueChange={(value: any) => setTempSettings((prev) => ({
+            <div className="space-y-2">
+              <Label htmlFor="theme">Color de acento</Label>
+              <Select
+                value={tempSettings.theme}
+                onValueChange={(value) =>
+                  setTempSettings((prev) => ({ ...prev, theme: value }))
+                }
+              >
+                <SelectTrigger id="theme">
+                  <SelectValue placeholder="Selecciona un tema" />
+                </SelectTrigger>
+                <SelectContent>
+                  {themes.map((theme) => (
+                    <SelectItem key={theme.name} value={theme.name}>
+                      <span className="flex items-center gap-2">
+                        <span
+                          className="w-3 h-3 rounded-full border border-border"
+                          style={{
+                            backgroundColor: isDark
+                              ? theme.cssVars.dark.primary
+                              : theme.cssVars.light.primary,
+                          }}
+                        />
+                        {theme.label}
+                      </span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="font">Fuente</Label>
+              <Select
+                value={tempSettings.fontFamily}
+                onValueChange={(value: FontFamily) =>
+                  setTempSettings((prev) => ({ ...prev, fontFamily: value }))
+                }
+              >
+                <SelectTrigger id="font">
+                  <SelectValue placeholder="Selecciona una fuente" />
+                </SelectTrigger>
+                <SelectContent>
+                  {FONT_OPTIONS.map((font) => (
+                    <SelectItem key={font.value} value={font.value}>
+                      <span style={{ fontFamily: font.fontFamily }}>
+                        {font.label}
+                      </span>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="flex items-center gap-3 pt-2">
+              <Switch
+                id="sfx-enabled"
+                checked={tempSettings.sfxEnabled}
+                onCheckedChange={(checked) =>
+                  setTempSettings((prev) => ({
                     ...prev,
-                    autoOrder: value,
-                }))}>
-                        <SelectTrigger className="h-9 w-fit min-w-[140px]">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          
-                          <SelectItem value="tidal-qobuz-amazon-deezer">
-                            <span className="flex items-center gap-1.5">
-                              <TidalIcon className="fill-current"/>
-                              <ArrowRight className="h-3 w-3 text-muted-foreground"/>
-                              <QobuzIcon className="fill-current"/>
-                              <ArrowRight className="h-3 w-3 text-muted-foreground"/>
-                              <AmazonIcon className="fill-current"/>
-                              <ArrowRight className="h-3 w-3 text-muted-foreground"/>
-                              <DeezerIcon className="fill-current"/>
-                            </span>
-                          </SelectItem>
-                          <SelectItem value="tidal-qobuz-deezer-amazon">
-                            <span className="flex items-center gap-1.5">
-                              <TidalIcon className="fill-current"/>
-                              <ArrowRight className="h-3 w-3 text-muted-foreground"/>
-                              <QobuzIcon className="fill-current"/>
-                              <ArrowRight className="h-3 w-3 text-muted-foreground"/>
-                              <DeezerIcon className="fill-current"/>
-                              <ArrowRight className="h-3 w-3 text-muted-foreground"/>
-                              <AmazonIcon className="fill-current"/>
-                            </span>
-                          </SelectItem>
-                          <SelectItem value="qobuz-tidal-amazon-deezer">
-                            <span className="flex items-center gap-1.5">
-                              <QobuzIcon className="fill-current"/>
-                              <ArrowRight className="h-3 w-3 text-muted-foreground"/>
-                              <TidalIcon className="fill-current"/>
-                              <ArrowRight className="h-3 w-3 text-muted-foreground"/>
-                              <AmazonIcon className="fill-current"/>
-                              <ArrowRight className="h-3 w-3 text-muted-foreground"/>
-                              <DeezerIcon className="fill-current"/>
-                            </span>
-                          </SelectItem>
-                          <SelectItem value="amazon-tidal-qobuz-deezer">
-                            <span className="flex items-center gap-1.5">
-                              <AmazonIcon className="fill-current"/>
-                              <ArrowRight className="h-3 w-3 text-muted-foreground"/>
-                              <TidalIcon className="fill-current"/>
-                              <ArrowRight className="h-3 w-3 text-muted-foreground"/>
-                              <QobuzIcon className="fill-current"/>
-                              <ArrowRight className="h-3 w-3 text-muted-foreground"/>
-                              <DeezerIcon className="fill-current"/>
-                            </span>
-                          </SelectItem>
-                          <SelectItem value="deezer-tidal-qobuz-amazon">
-                            <span className="flex items-center gap-1.5">
-                              <DeezerIcon className="fill-current"/>
-                              <ArrowRight className="h-3 w-3 text-muted-foreground"/>
-                              <TidalIcon className="fill-current"/>
-                              <ArrowRight className="h-3 w-3 text-muted-foreground"/>
-                              <QobuzIcon className="fill-current"/>
-                              <ArrowRight className="h-3 w-3 text-muted-foreground"/>
-                              <AmazonIcon className="fill-current"/>
-                            </span>
-                          </SelectItem>
-                          <SelectItem value="deezer-qobuz-amazon-tidal">
-                            <span className="flex items-center gap-1.5">
-                              <DeezerIcon className="fill-current"/>
-                              <ArrowRight className="h-3 w-3 text-muted-foreground"/>
-                              <QobuzIcon className="fill-current"/>
-                              <ArrowRight className="h-3 w-3 text-muted-foreground"/>
-                              <AmazonIcon className="fill-current"/>
-                              <ArrowRight className="h-3 w-3 text-muted-foreground"/>
-                              <TidalIcon className="fill-current"/>
-                            </span>
-                          </SelectItem>
-                          <SelectItem value="deezer-amazon-tidal-qobuz">
-                            <span className="flex items-center gap-1.5">
-                              <DeezerIcon className="fill-current"/>
-                              <ArrowRight className="h-3 w-3 text-muted-foreground"/>
-                              <AmazonIcon className="fill-current"/>
-                              <ArrowRight className="h-3 w-3 text-muted-foreground"/>
-                              <TidalIcon className="fill-current"/>
-                              <ArrowRight className="h-3 w-3 text-muted-foreground"/>
-                              <QobuzIcon className="fill-current"/>
-                            </span>
-                          </SelectItem>
+                    sfxEnabled: checked,
+                  }))
+                }
+              />
+              <Label
+                htmlFor="sfx-enabled"
+                className="cursor-pointer text-sm font-normal"
+              >
+                Efectos de sonido
+              </Label>
+            </div>
+          </div>
 
-                          
-                          <SelectItem value="tidal-qobuz-deezer">
-                            <span className="flex items-center gap-1.5">
-                              <TidalIcon className="fill-current"/>
-                              <ArrowRight className="h-3 w-3 text-muted-foreground"/>
-                              <QobuzIcon className="fill-current"/>
-                              <ArrowRight className="h-3 w-3 text-muted-foreground"/>
-                              <DeezerIcon className="fill-current"/>
-                            </span>
-                          </SelectItem>
-                          <SelectItem value="tidal-amazon-deezer">
-                            <span className="flex items-center gap-1.5">
-                              <TidalIcon className="fill-current"/>
-                              <ArrowRight className="h-3 w-3 text-muted-foreground"/>
-                              <AmazonIcon className="fill-current"/>
-                              <ArrowRight className="h-3 w-3 text-muted-foreground"/>
-                              <DeezerIcon className="fill-current"/>
-                            </span>
-                          </SelectItem>
-                          <SelectItem value="qobuz-amazon-deezer">
-                            <span className="flex items-center gap-1.5">
-                              <QobuzIcon className="fill-current"/>
-                              <ArrowRight className="h-3 w-3 text-muted-foreground"/>
-                              <AmazonIcon className="fill-current"/>
-                              <ArrowRight className="h-3 w-3 text-muted-foreground"/>
-                              <DeezerIcon className="fill-current"/>
-                            </span>
-                          </SelectItem>
-                          <SelectItem value="amazon-qobuz-deezer">
-                            <span className="flex items-center gap-1.5">
-                              <AmazonIcon className="fill-current"/>
-                              <ArrowRight className="h-3 w-3 text-muted-foreground"/>
-                              <QobuzIcon className="fill-current"/>
-                              <ArrowRight className="h-3 w-3 text-muted-foreground"/>
-                              <DeezerIcon className="fill-current"/>
-                            </span>
-                          </SelectItem>
-                          <SelectItem value="amazon-tidal-deezer">
-                            <span className="flex items-center gap-1.5">
-                              <AmazonIcon className="fill-current"/>
-                              <ArrowRight className="h-3 w-3 text-muted-foreground"/>
-                              <TidalIcon className="fill-current"/>
-                              <ArrowRight className="h-3 w-3 text-muted-foreground"/>
-                              <DeezerIcon className="fill-current"/>
-                            </span>
-                          </SelectItem>
-                          <SelectItem value="deezer-qobuz-amazon">
-                            <span className="flex items-center gap-1.5">
-                              <DeezerIcon className="fill-current"/>
-                              <ArrowRight className="h-3 w-3 text-muted-foreground"/>
-                              <QobuzIcon className="fill-current"/>
-                              <ArrowRight className="h-3 w-3 text-muted-foreground"/>
-                              <AmazonIcon className="fill-current"/>
-                            </span>
-                          </SelectItem>
-                          <SelectItem value="tidal-qobuz-amazon">
-                            <span className="flex items-center gap-1.5">
-                              <TidalIcon className="fill-current"/>
-                              <ArrowRight className="h-3 w-3 text-muted-foreground"/>
-                              <QobuzIcon className="fill-current"/>
-                              <ArrowRight className="h-3 w-3 text-muted-foreground"/>
-                              <AmazonIcon className="fill-current"/>
-                            </span>
-                          </SelectItem>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="downloader">Fuente</Label>
+              <div className="flex gap-2 flex-wrap">
+                <Select
+                  value={tempSettings.downloader}
+                  onValueChange={(value: any) =>
+                    setTempSettings((prev) => ({
+                      ...prev,
+                      downloader: value,
+                    }))
+                  }
+                >
+                  <SelectTrigger id="downloader" className="h-9 w-fit">
+                    <SelectValue placeholder="Selecciona una fuente" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="auto">Automático</SelectItem>
+                    <SelectItem value="tidal">
+                      <span className="flex items-center">
+                        <TidalIcon />
+                        Tidal
+                      </span>
+                    </SelectItem>
+                    <SelectItem value="qobuz">
+                      <span className="flex items-center">
+                        <QobuzIcon />
+                        Qobuz
+                      </span>
+                    </SelectItem>
+                    <SelectItem value="amazon">
+                      <span className="flex items-center">
+                        <AmazonIcon />
+                        Amazon Music
+                      </span>
+                    </SelectItem>
+                    <SelectItem value="deezer">
+                      <span className="flex items-center">
+                        <DeezerIcon />
+                        Deezer
+                      </span>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
 
-                          
-                          <SelectItem value="tidal-deezer">
-                            <span className="flex items-center gap-1.5">
-                              <TidalIcon className="fill-current"/>
-                              <ArrowRight className="h-3 w-3 text-muted-foreground"/>
-                              <DeezerIcon className="fill-current"/>
-                            </span>
-                          </SelectItem>
-                          <SelectItem value="qobuz-deezer">
-                            <span className="flex items-center gap-1.5">
-                              <QobuzIcon className="fill-current"/>
-                              <ArrowRight className="h-3 w-3 text-muted-foreground"/>
-                              <DeezerIcon className="fill-current"/>
-                            </span>
-                          </SelectItem>
-                          <SelectItem value="amazon-deezer">
-                            <span className="flex items-center gap-1.5">
-                              <AmazonIcon className="fill-current"/>
-                              <ArrowRight className="h-3 w-3 text-muted-foreground"/>
-                              <DeezerIcon className="fill-current"/>
-                            </span>
-                          </SelectItem>
-                          <SelectItem value="deezer-tidal">
-                            <span className="flex items-center gap-1.5">
-                              <DeezerIcon className="fill-current"/>
-                              <ArrowRight className="h-3 w-3 text-muted-foreground"/>
-                              <TidalIcon className="fill-current"/>
-                            </span>
-                          </SelectItem>
-                          <SelectItem value="deezer-qobuz">
-                            <span className="flex items-center gap-1.5">
-                              <DeezerIcon className="fill-current"/>
-                              <ArrowRight className="h-3 w-3 text-muted-foreground"/>
-                              <QobuzIcon className="fill-current"/>
-                            </span>
-                          </SelectItem>
-                          <SelectItem value="deezer-amazon">
-                            <span className="flex items-center gap-1.5">
-                              <DeezerIcon className="fill-current"/>
-                              <ArrowRight className="h-3 w-3 text-muted-foreground"/>
-                              <AmazonIcon className="fill-current"/>
-                            </span>
-                          </SelectItem>
-                          <SelectItem value="tidal-qobuz">
-                            <span className="flex items-center gap-1.5">
-                              <TidalIcon className="fill-current"/>
-                              <ArrowRight className="h-3 w-3 text-muted-foreground"/>
-                              <QobuzIcon className="fill-current"/>
-                            </span>
-                          </SelectItem>
-                          <SelectItem value="tidal-amazon">
-                            <span className="flex items-center gap-1.5">
-                              <TidalIcon className="fill-current"/>
-                              <ArrowRight className="h-3 w-3 text-muted-foreground"/>
-                              <AmazonIcon className="fill-current"/>
-                            </span>
-                          </SelectItem>
-                          <SelectItem value="qobuz-tidal">
-                            <span className="flex items-center gap-1.5">
-                              <QobuzIcon className="fill-current"/>
-                              <ArrowRight className="h-3 w-3 text-muted-foreground"/>
-                              <TidalIcon className="fill-current"/>
-                            </span>
-                          </SelectItem>
-                          <SelectItem value="qobuz-amazon">
-                            <span className="flex items-center gap-1.5">
-                              <QobuzIcon className="fill-current"/>
-                              <ArrowRight className="h-3 w-3 text-muted-foreground"/>
-                              <AmazonIcon className="fill-current"/>
-                            </span>
-                          </SelectItem>
-                          <SelectItem value="amazon-tidal">
-                            <span className="flex items-center gap-1.5">
-                              <AmazonIcon className="fill-current"/>
-                              <ArrowRight className="h-3 w-3 text-muted-foreground"/>
-                              <TidalIcon className="fill-current"/>
-                            </span>
-                          </SelectItem>
-                          <SelectItem value="amazon-qobuz">
-                            <span className="flex items-center gap-1.5">
-                              <AmazonIcon className="fill-current"/>
-                              <ArrowRight className="h-3 w-3 text-muted-foreground"/>
-                              <QobuzIcon className="fill-current"/>
-                            </span>
-                          </SelectItem>
-                        </SelectContent>
-                      </Select>
-
-                      <Select value={tempSettings.autoQuality || "16"} onValueChange={handleAutoQualityChange}>
-                        <SelectTrigger className="h-9 w-fit">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="16">16-bit/44.1kHz</SelectItem>
-                          <SelectItem value="24">24-bit/48kHz</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </>)}
-
-                  {tempSettings.downloader === "tidal" && (<Select value={tempSettings.tidalQuality} onValueChange={handleTidalQualityChange}>
-                      <SelectTrigger className="h-9 w-fit">
+                {tempSettings.downloader === "auto" && (
+                  <>
+                    <Select
+                      value={tempSettings.autoOrder || "tidal-qobuz-amazon"}
+                      onValueChange={(value: any) =>
+                        setTempSettings((prev) => ({
+                          ...prev,
+                          autoOrder: value,
+                        }))
+                      }
+                    >
+                      <SelectTrigger className="h-9 w-fit min-w-[140px]">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="LOSSLESS">16-bit/44.1kHz</SelectItem>
-                        <SelectItem value="HI_RES_LOSSLESS">
-                          24-bit/48kHz
+                        <SelectItem value="tidal-qobuz-amazon-deezer">
+                          <span className="flex items-center gap-1.5">
+                            <TidalIcon className="fill-current" />
+                            <ArrowRight className="h-3 w-3 text-muted-foreground" />
+                            <QobuzIcon className="fill-current" />
+                            <ArrowRight className="h-3 w-3 text-muted-foreground" />
+                            <AmazonIcon className="fill-current" />
+                            <ArrowRight className="h-3 w-3 text-muted-foreground" />
+                            <DeezerIcon className="fill-current" />
+                          </span>
+                        </SelectItem>
+                        <SelectItem value="tidal-qobuz-deezer-amazon">
+                          <span className="flex items-center gap-1.5">
+                            <TidalIcon className="fill-current" />
+                            <ArrowRight className="h-3 w-3 text-muted-foreground" />
+                            <QobuzIcon className="fill-current" />
+                            <ArrowRight className="h-3 w-3 text-muted-foreground" />
+                            <DeezerIcon className="fill-current" />
+                            <ArrowRight className="h-3 w-3 text-muted-foreground" />
+                            <AmazonIcon className="fill-current" />
+                          </span>
+                        </SelectItem>
+                        <SelectItem value="qobuz-tidal-amazon-deezer">
+                          <span className="flex items-center gap-1.5">
+                            <QobuzIcon className="fill-current" />
+                            <ArrowRight className="h-3 w-3 text-muted-foreground" />
+                            <TidalIcon className="fill-current" />
+                            <ArrowRight className="h-3 w-3 text-muted-foreground" />
+                            <AmazonIcon className="fill-current" />
+                            <ArrowRight className="h-3 w-3 text-muted-foreground" />
+                            <DeezerIcon className="fill-current" />
+                          </span>
+                        </SelectItem>
+                        <SelectItem value="amazon-tidal-qobuz-deezer">
+                          <span className="flex items-center gap-1.5">
+                            <AmazonIcon className="fill-current" />
+                            <ArrowRight className="h-3 w-3 text-muted-foreground" />
+                            <TidalIcon className="fill-current" />
+                            <ArrowRight className="h-3 w-3 text-muted-foreground" />
+                            <QobuzIcon className="fill-current" />
+                            <ArrowRight className="h-3 w-3 text-muted-foreground" />
+                            <DeezerIcon className="fill-current" />
+                          </span>
+                        </SelectItem>
+                        <SelectItem value="deezer-tidal-qobuz-amazon">
+                          <span className="flex items-center gap-1.5">
+                            <DeezerIcon className="fill-current" />
+                            <ArrowRight className="h-3 w-3 text-muted-foreground" />
+                            <TidalIcon className="fill-current" />
+                            <ArrowRight className="h-3 w-3 text-muted-foreground" />
+                            <QobuzIcon className="fill-current" />
+                            <ArrowRight className="h-3 w-3 text-muted-foreground" />
+                            <AmazonIcon className="fill-current" />
+                          </span>
+                        </SelectItem>
+                        <SelectItem value="deezer-qobuz-amazon-tidal">
+                          <span className="flex items-center gap-1.5">
+                            <DeezerIcon className="fill-current" />
+                            <ArrowRight className="h-3 w-3 text-muted-foreground" />
+                            <QobuzIcon className="fill-current" />
+                            <ArrowRight className="h-3 w-3 text-muted-foreground" />
+                            <AmazonIcon className="fill-current" />
+                            <ArrowRight className="h-3 w-3 text-muted-foreground" />
+                            <TidalIcon className="fill-current" />
+                          </span>
+                        </SelectItem>
+                        <SelectItem value="deezer-amazon-tidal-qobuz">
+                          <span className="flex items-center gap-1.5">
+                            <DeezerIcon className="fill-current" />
+                            <ArrowRight className="h-3 w-3 text-muted-foreground" />
+                            <AmazonIcon className="fill-current" />
+                            <ArrowRight className="h-3 w-3 text-muted-foreground" />
+                            <TidalIcon className="fill-current" />
+                            <ArrowRight className="h-3 w-3 text-muted-foreground" />
+                            <QobuzIcon className="fill-current" />
+                          </span>
+                        </SelectItem>
+
+                        <SelectItem value="tidal-qobuz-deezer">
+                          <span className="flex items-center gap-1.5">
+                            <TidalIcon className="fill-current" />
+                            <ArrowRight className="h-3 w-3 text-muted-foreground" />
+                            <QobuzIcon className="fill-current" />
+                            <ArrowRight className="h-3 w-3 text-muted-foreground" />
+                            <DeezerIcon className="fill-current" />
+                          </span>
+                        </SelectItem>
+                        <SelectItem value="tidal-amazon-deezer">
+                          <span className="flex items-center gap-1.5">
+                            <TidalIcon className="fill-current" />
+                            <ArrowRight className="h-3 w-3 text-muted-foreground" />
+                            <AmazonIcon className="fill-current" />
+                            <ArrowRight className="h-3 w-3 text-muted-foreground" />
+                            <DeezerIcon className="fill-current" />
+                          </span>
+                        </SelectItem>
+                        <SelectItem value="qobuz-amazon-deezer">
+                          <span className="flex items-center gap-1.5">
+                            <QobuzIcon className="fill-current" />
+                            <ArrowRight className="h-3 w-3 text-muted-foreground" />
+                            <AmazonIcon className="fill-current" />
+                            <ArrowRight className="h-3 w-3 text-muted-foreground" />
+                            <DeezerIcon className="fill-current" />
+                          </span>
+                        </SelectItem>
+                        <SelectItem value="amazon-qobuz-deezer">
+                          <span className="flex items-center gap-1.5">
+                            <AmazonIcon className="fill-current" />
+                            <ArrowRight className="h-3 w-3 text-muted-foreground" />
+                            <QobuzIcon className="fill-current" />
+                            <ArrowRight className="h-3 w-3 text-muted-foreground" />
+                            <DeezerIcon className="fill-current" />
+                          </span>
+                        </SelectItem>
+                        <SelectItem value="amazon-tidal-deezer">
+                          <span className="flex items-center gap-1.5">
+                            <AmazonIcon className="fill-current" />
+                            <ArrowRight className="h-3 w-3 text-muted-foreground" />
+                            <TidalIcon className="fill-current" />
+                            <ArrowRight className="h-3 w-3 text-muted-foreground" />
+                            <DeezerIcon className="fill-current" />
+                          </span>
+                        </SelectItem>
+                        <SelectItem value="deezer-qobuz-amazon">
+                          <span className="flex items-center gap-1.5">
+                            <DeezerIcon className="fill-current" />
+                            <ArrowRight className="h-3 w-3 text-muted-foreground" />
+                            <QobuzIcon className="fill-current" />
+                            <ArrowRight className="h-3 w-3 text-muted-foreground" />
+                            <AmazonIcon className="fill-current" />
+                          </span>
+                        </SelectItem>
+                        <SelectItem value="tidal-qobuz-amazon">
+                          <span className="flex items-center gap-1.5">
+                            <TidalIcon className="fill-current" />
+                            <ArrowRight className="h-3 w-3 text-muted-foreground" />
+                            <QobuzIcon className="fill-current" />
+                            <ArrowRight className="h-3 w-3 text-muted-foreground" />
+                            <AmazonIcon className="fill-current" />
+                          </span>
+                        </SelectItem>
+
+                        <SelectItem value="tidal-deezer">
+                          <span className="flex items-center gap-1.5">
+                            <TidalIcon className="fill-current" />
+                            <ArrowRight className="h-3 w-3 text-muted-foreground" />
+                            <DeezerIcon className="fill-current" />
+                          </span>
+                        </SelectItem>
+                        <SelectItem value="qobuz-deezer">
+                          <span className="flex items-center gap-1.5">
+                            <QobuzIcon className="fill-current" />
+                            <ArrowRight className="h-3 w-3 text-muted-foreground" />
+                            <DeezerIcon className="fill-current" />
+                          </span>
+                        </SelectItem>
+                        <SelectItem value="amazon-deezer">
+                          <span className="flex items-center gap-1.5">
+                            <AmazonIcon className="fill-current" />
+                            <ArrowRight className="h-3 w-3 text-muted-foreground" />
+                            <DeezerIcon className="fill-current" />
+                          </span>
+                        </SelectItem>
+                        <SelectItem value="deezer-tidal">
+                          <span className="flex items-center gap-1.5">
+                            <DeezerIcon className="fill-current" />
+                            <ArrowRight className="h-3 w-3 text-muted-foreground" />
+                            <TidalIcon className="fill-current" />
+                          </span>
+                        </SelectItem>
+                        <SelectItem value="deezer-qobuz">
+                          <span className="flex items-center gap-1.5">
+                            <DeezerIcon className="fill-current" />
+                            <ArrowRight className="h-3 w-3 text-muted-foreground" />
+                            <QobuzIcon className="fill-current" />
+                          </span>
+                        </SelectItem>
+                        <SelectItem value="deezer-amazon">
+                          <span className="flex items-center gap-1.5">
+                            <DeezerIcon className="fill-current" />
+                            <ArrowRight className="h-3 w-3 text-muted-foreground" />
+                            <AmazonIcon className="fill-current" />
+                          </span>
+                        </SelectItem>
+                        <SelectItem value="tidal-qobuz">
+                          <span className="flex items-center gap-1.5">
+                            <TidalIcon className="fill-current" />
+                            <ArrowRight className="h-3 w-3 text-muted-foreground" />
+                            <QobuzIcon className="fill-current" />
+                          </span>
+                        </SelectItem>
+                        <SelectItem value="tidal-amazon">
+                          <span className="flex items-center gap-1.5">
+                            <TidalIcon className="fill-current" />
+                            <ArrowRight className="h-3 w-3 text-muted-foreground" />
+                            <AmazonIcon className="fill-current" />
+                          </span>
+                        </SelectItem>
+                        <SelectItem value="qobuz-tidal">
+                          <span className="flex items-center gap-1.5">
+                            <QobuzIcon className="fill-current" />
+                            <ArrowRight className="h-3 w-3 text-muted-foreground" />
+                            <TidalIcon className="fill-current" />
+                          </span>
+                        </SelectItem>
+                        <SelectItem value="qobuz-amazon">
+                          <span className="flex items-center gap-1.5">
+                            <QobuzIcon className="fill-current" />
+                            <ArrowRight className="h-3 w-3 text-muted-foreground" />
+                            <AmazonIcon className="fill-current" />
+                          </span>
+                        </SelectItem>
+                        <SelectItem value="amazon-tidal">
+                          <span className="flex items-center gap-1.5">
+                            <AmazonIcon className="fill-current" />
+                            <ArrowRight className="h-3 w-3 text-muted-foreground" />
+                            <TidalIcon className="fill-current" />
+                          </span>
+                        </SelectItem>
+                        <SelectItem value="amazon-qobuz">
+                          <span className="flex items-center gap-1.5">
+                            <AmazonIcon className="fill-current" />
+                            <ArrowRight className="h-3 w-3 text-muted-foreground" />
+                            <QobuzIcon className="fill-current" />
+                          </span>
                         </SelectItem>
                       </SelectContent>
-                    </Select>)}
+                    </Select>
 
-                  {tempSettings.downloader === "qobuz" && (<Select value={tempSettings.qobuzQuality} onValueChange={handleQobuzQualityChange}>
+                    <Select
+                      value={tempSettings.autoQuality || "16"}
+                      onValueChange={handleAutoQualityChange}
+                    >
                       <SelectTrigger className="h-9 w-fit">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="6">16-bit/44.1kHz</SelectItem>
-                        <SelectItem value="27">24-bit/48kHz - 192kHz</SelectItem>
+                        <SelectItem value="16">16‑bit/44.1kHz</SelectItem>
+                        <SelectItem value="24">24‑bit/48kHz</SelectItem>
                       </SelectContent>
-                    </Select>)}
+                    </Select>
+                  </>
+                )}
 
-                  {tempSettings.downloader === "amazon" && (<div className="h-9 px-3 flex items-center text-sm font-medium border border-input rounded-md bg-muted/30 text-muted-foreground whitespace-nowrap cursor-default">
-                      16-bit - 24-bit/44.1kHz - 192kHz
-                    </div>)}
-                  {tempSettings.downloader === "deezer" && (<div className="h-9 px-3 flex items-center text-sm font-medium border border-input rounded-md bg-muted/30 text-muted-foreground whitespace-nowrap cursor-default">
-                      16-bit/44.1kHz
-                    </div>)}
-                </div>
-
-                {((tempSettings.downloader === "tidal" &&
-                tempSettings.tidalQuality === "HI_RES_LOSSLESS") ||
-                (tempSettings.downloader === "qobuz" &&
-                    tempSettings.qobuzQuality === "27") ||
-                (tempSettings.downloader === "auto" &&
-                    tempSettings.autoQuality === "24")) && (<div className="flex items-center gap-3 pt-2">
-                    <div className="flex items-center gap-3">
-                      <Switch id="allow-fallback" checked={tempSettings.allowFallback} onCheckedChange={(checked) => setTempSettings((prev) => ({
-                    ...prev,
-                    allowFallback: checked,
-                }))}/>
-                      <Label htmlFor="allow-fallback" className="text-sm font-normal cursor-pointer">
-                        Allow Quality Fallback (16-bit)
-                      </Label>
-                    </div>
-                  </div>)}
-              </div>
-
-              <div className="border-t pt-6"/>
-
-              <div className="space-y-4">
-                <div className="flex items-center gap-3">
-                  <Switch id="embed-lyrics" checked={tempSettings.embedLyrics} onCheckedChange={(checked) => setTempSettings((prev) => ({
-                ...prev,
-                embedLyrics: checked,
-            }))}/>
-                  <Label htmlFor="embed-lyrics" className="cursor-pointer text-sm font-normal">
-                    Embed Lyrics
-                  </Label>
-                </div>
-                <div className="flex items-center gap-3">
-                  <Switch id="embed-max-quality-cover" checked={tempSettings.embedMaxQualityCover} onCheckedChange={(checked) => setTempSettings((prev) => ({
-                ...prev,
-                embedMaxQualityCover: checked,
-            }))}/>
-                  <Label htmlFor="embed-max-quality-cover" className="cursor-pointer text-sm font-normal">
-                    Embed Max Quality Cover
-                  </Label>
-                </div>
-                <div className="flex items-center gap-3">
-                  <Switch id="embed-genre" checked={tempSettings.embedGenre} onCheckedChange={(checked) => setTempSettings((prev) => ({
-                ...prev,
-                embedGenre: checked,
-            }))}/>
-                  <Label htmlFor="embed-genre" className="cursor-pointer text-sm font-normal">
-                    Embed Genre
-                  </Label>
-                </div>
-                {tempSettings.embedGenre && (<div className="flex items-center gap-3">
-                    <Switch id="use-single-genre" checked={tempSettings.useSingleGenre} onCheckedChange={(checked) => setTempSettings((prev) => ({
-                    ...prev,
-                    useSingleGenre: checked,
-                }))}/>
-                    <Label htmlFor="use-single-genre" className="text-sm cursor-pointer font-normal">
-                      Use Single Genre
-                    </Label>
-                  </div>)}
-              </div>
-            </div>
-          </div>)}
-
-        {activeTab === "files" && (<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <Label className="text-sm">Folder Structure</Label>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Info className="h-3.5 w-3.5 text-muted-foreground cursor-help"/>
-                    </TooltipTrigger>
-                    <TooltipContent side="top">
-                      <p className="text-xs whitespace-nowrap">
-                        Variables:{" "}
-                        {TEMPLATE_VARIABLES.map((v) => v.key).join(", ")}
-                      </p>
-                    </TooltipContent>
-                  </Tooltip>
-                </div>
-                <div className="flex gap-2">
-                  <Select value={tempSettings.folderPreset} onValueChange={(value: FolderPreset) => {
-                const preset = FOLDER_PRESETS[value];
-                setTempSettings((prev) => ({
-                    ...prev,
-                    folderPreset: value,
-                    folderTemplate: value === "custom"
-                        ? prev.folderTemplate || preset.template
-                        : preset.template,
-                }));
-            }}>
+                {tempSettings.downloader === "tidal" && (
+                  <Select
+                    value={tempSettings.tidalQuality}
+                    onValueChange={handleTidalQualityChange}
+                  >
                     <SelectTrigger className="h-9 w-fit">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      {Object.entries(FOLDER_PRESETS).map(([key, { label }]) => (<SelectItem key={key} value={key}>
-                            {label}
-                          </SelectItem>))}
+                      <SelectItem value="LOSSLESS">
+                        16‑bit/44.1kHz
+                      </SelectItem>
+                      <SelectItem value="HI_RES_LOSSLESS">
+                        24‑bit/48kHz
+                      </SelectItem>
                     </SelectContent>
                   </Select>
-                  {tempSettings.folderPreset === "custom" && (<InputWithContext value={tempSettings.folderTemplate} onChange={(e) => setTempSettings((prev) => ({
-                    ...prev,
-                    folderTemplate: e.target.value,
-                }))} placeholder="{artist}/{album}" className="h-9 text-sm flex-1"/>)}
+                )}
+
+                {tempSettings.downloader === "qobuz" && (
+                  <Select
+                    value={tempSettings.qobuzQuality}
+                    onValueChange={handleQobuzQualityChange}
+                  >
+                    <SelectTrigger className="h-9 w-fit">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="6">16‑bit/44.1kHz</SelectItem>
+                      <SelectItem value="27">
+                        24‑bit/48kHz - 192kHz
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                )}
+
+                {tempSettings.downloader === "amazon" && (
+                  <div className="h-9 px-3 flex items-center text-sm font-medium border border-input rounded-md bg-muted/30 text-muted-foreground whitespace-nowrap cursor-default">
+                    16‑bit - 24‑bit/44.1kHz - 192kHz
+                  </div>
+                )}
+                {tempSettings.downloader === "deezer" && (
+                  <div className="h-9 px-3 flex items-center text-sm font-medium border border-input rounded-md bg-muted/30 text-muted-foreground whitespace-nowrap cursor-default">
+                    16‑bit/44.1kHz
+                  </div>
+                )}
+              </div>
+
+              {((tempSettings.downloader === "tidal" &&
+                tempSettings.tidalQuality === "HI_RES_LOSSLESS") ||
+                (tempSettings.downloader === "qobuz" &&
+                  tempSettings.qobuzQuality === "27") ||
+                (tempSettings.downloader === "auto" &&
+                  tempSettings.autoQuality === "24")) && (
+                <div className="flex items-center gap-3 pt-2">
+                  <div className="flex items-center gap-3">
+                    <Switch
+                      id="allow-fallback"
+                      checked={tempSettings.allowFallback}
+                      onCheckedChange={(checked) =>
+                        setTempSettings((prev) => ({
+                          ...prev,
+                          allowFallback: checked,
+                        }))
+                      }
+                    />
+                    <Label
+                      htmlFor="allow-fallback"
+                      className="text-sm font-normal cursor-pointer"
+                    >
+                      Permitir degradar calidad (16‑bit)
+                    </Label>
+                  </div>
                 </div>
-                {tempSettings.folderTemplate && (<p className="text-xs text-muted-foreground">
-                    Preview:{" "}
-                    <span className="font-mono">
-                      {tempSettings.folderTemplate
-                    .replace(/\{artist\}/g, "Kendrick Lamar, SZA")
-                    .replace(/\{album\}/g, "Black Panther")
-                    .replace(/\{album_artist\}/g, "Kendrick Lamar")
-                    .replace(/\{year\}/g, "2018")
-                    .replace(/\{date\}/g, "2018-02-09")}
-                      /
-                    </span>
-                  </p>)}
-              </div>
-
-              <div className="flex items-center gap-3">
-                <Switch id="create-playlist-folder" checked={tempSettings.createPlaylistFolder} onCheckedChange={(checked) => setTempSettings((prev) => ({
-                ...prev,
-                createPlaylistFolder: checked,
-            }))}/>
-                <Label htmlFor="create-playlist-folder" className="text-sm cursor-pointer font-normal">
-                  Playlist Folder
-                </Label>
-              </div>
-
-              <div className="flex items-center gap-3">
-                <Switch id="create-m3u8-file" checked={tempSettings.createM3u8File} onCheckedChange={(checked) => setTempSettings((prev) => ({
-                ...prev,
-                createM3u8File: checked,
-            }))}/>
-                <Label htmlFor="create-m3u8-file" className="text-sm cursor-pointer font-normal">
-                  Create M3U8 Playlist File
-                </Label>
-              </div>
-
-              <div className="flex items-center gap-3">
-                <Switch id="use-first-artist-only" checked={tempSettings.useFirstArtistOnly} onCheckedChange={(checked) => setTempSettings((prev) => ({
-                ...prev,
-                useFirstArtistOnly: checked,
-            }))}/>
-                <Label htmlFor="use-first-artist-only" className="text-sm cursor-pointer font-normal">
-                  Use First Artist Only
-                </Label>
-              </div>
-
-
+              )}
             </div>
 
+            <div className="border-t pt-6" />
+
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                <Switch
+                  id="embed-lyrics"
+                  checked={tempSettings.embedLyrics}
+                  onCheckedChange={(checked) =>
+                    setTempSettings((prev) => ({
+                      ...prev,
+                      embedLyrics: checked,
+                    }))
+                  }
+                />
+                <Label
+                  htmlFor="embed-lyrics"
+                  className="cursor-pointer text-sm font-normal"
+                >
+                  Incrustar letras
+                </Label>
+              </div>
+              <div className="flex items-center gap-3">
+                <Switch
+                  id="embed-max-quality-cover"
+                  checked={tempSettings.embedMaxQualityCover}
+                  onCheckedChange={(checked) =>
+                    setTempSettings((prev) => ({
+                      ...prev,
+                      embedMaxQualityCover: checked,
+                    }))
+                  }
+                />
+                <Label
+                  htmlFor="embed-max-quality-cover"
+                  className="cursor-pointer text-sm font-normal"
+                >
+                  Incrustar carátula en máxima calidad
+                </Label>
+              </div>
+              <div className="flex items-center gap-3">
+                <Switch
+                  id="embed-genre"
+                  checked={tempSettings.embedGenre}
+                  onCheckedChange={(checked) =>
+                    setTempSettings((prev) => ({
+                      ...prev,
+                      embedGenre: checked,
+                    }))
+                  }
+                />
+                <Label
+                  htmlFor="embed-genre"
+                  className="cursor-pointer text-sm font-normal"
+                >
+                  Incrustar género
+                </Label>
+              </div>
+              {tempSettings.embedGenre && (
+                <div className="flex items-center gap-3">
+                  <Switch
+                    id="use-single-genre"
+                    checked={tempSettings.useSingleGenre}
+                    onCheckedChange={(checked) =>
+                      setTempSettings((prev) => ({
+                        ...prev,
+                        useSingleGenre: checked,
+                      }))
+                    }
+                  />
+                  <Label
+                    htmlFor="use-single-genre"
+                    className="text-sm cursor-pointer font-normal"
+                  >
+                    Usar un solo género
+                  </Label>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {activeTab === "files" && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-4">
             <div className="space-y-2">
               <div className="flex items-center gap-2">
-                <Label className="text-sm">Filename Format</Label>
+                <Label className="text-sm">Estructura de carpetas</Label>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <Info className="h-3.5 w-3.5 text-muted-foreground cursor-help"/>
+                    <Info className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
                   </TooltipTrigger>
                   <TooltipContent side="top">
                     <p className="text-xs whitespace-nowrap">
@@ -723,34 +782,209 @@ export function SettingsPage({ onUnsavedChangesChange, onResetRequest, }: Settin
                 </Tooltip>
               </div>
               <div className="flex gap-2">
-                <Select value={tempSettings.filenamePreset} onValueChange={(value: FilenamePreset) => {
-                const preset = FILENAME_PRESETS[value];
-                setTempSettings((prev) => ({
-                    ...prev,
-                    filenamePreset: value,
-                    filenameTemplate: value === "custom"
-                        ? prev.filenameTemplate || preset.template
-                        : preset.template,
-                }));
-            }}>
+                <Select
+                  value={tempSettings.folderPreset}
+                  onValueChange={(value: FolderPreset) => {
+                    const preset = FOLDER_PRESETS[value];
+                    setTempSettings((prev) => ({
+                      ...prev,
+                      folderPreset: value,
+                      folderTemplate:
+                        value === "custom"
+                          ? prev.folderTemplate || preset.template
+                          : preset.template,
+                    }));
+                  }}
+                >
                   <SelectTrigger className="h-9 w-fit">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {Object.entries(FILENAME_PRESETS).map(([key, { label }]) => (<SelectItem key={key} value={key}>
+                    {Object.entries(FOLDER_PRESETS).map(
+                      ([key, { label }]) => (
+                        <SelectItem key={key} value={key}>
                           {label}
-                        </SelectItem>))}
+                        </SelectItem>
+                      ),
+                    )}
                   </SelectContent>
                 </Select>
-                {tempSettings.filenamePreset === "custom" && (<InputWithContext value={tempSettings.filenameTemplate} onChange={(e) => setTempSettings((prev) => ({
-                    ...prev,
-                    filenameTemplate: e.target.value,
-                }))} placeholder="{track}. {title}" className="h-9 text-sm flex-1"/>)}
+                {tempSettings.folderPreset === "custom" && (
+                  <InputWithContext
+                    value={tempSettings.folderTemplate}
+                    onChange={(e) =>
+                      setTempSettings((prev) => ({
+                        ...prev,
+                        folderTemplate: e.target.value,
+                      }))
+                    }
+                    placeholder="{artist}/{album}"
+                    className="h-9 text-sm flex-1"
+                  />
+                )}
               </div>
-              {tempSettings.filenameTemplate && (<p className="text-xs text-muted-foreground">
-                  Preview:{" "}
+              {tempSettings.folderTemplate && (
+                <p className="text-xs text-muted-foreground">
+                  Vista previa:{" "}
                   <span className="font-mono">
-                    {tempSettings.filenameTemplate
+                    {tempSettings.folderTemplate
+                      .replace(/\{artist\}/g, "Kendrick Lamar, SZA")
+                      .replace(/\{album\}/g, "Black Panther")
+                      .replace(/\{album_artist\}/g, "Kendrick Lamar")
+                      .replace(/\{year\}/g, "2018")
+                      .replace(/\{date\}/g, "2018-02-09")}
+                    /
+                  </span>
+                </p>
+              )}
+            </div>
+
+            <div className="flex items-center gap-3">
+              <Switch
+                id="create-playlist-folder"
+                checked={tempSettings.createPlaylistFolder}
+                onCheckedChange={(checked) =>
+                  setTempSettings((prev) => ({
+                    ...prev,
+                    createPlaylistFolder: checked,
+                  }))
+                }
+              />
+              <Label
+                htmlFor="create-playlist-folder"
+                className="text-sm cursor-pointer font-normal"
+              >
+                Carpeta de playlist
+              </Label>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <Switch
+                id="create-m3u8-file"
+                checked={tempSettings.createM3u8File}
+                onCheckedChange={(checked) =>
+                  setTempSettings((prev) => ({
+                    ...prev,
+                    createM3u8File: checked,
+                  }))
+                }
+              />
+              <Label
+                htmlFor="create-m3u8-file"
+                className="text-sm cursor-pointer font-normal"
+              >
+                Crear archivo de playlist M3U8
+              </Label>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <Switch
+                id="use-first-artist-only"
+                checked={tempSettings.useFirstArtistOnly}
+                onCheckedChange={(checked) =>
+                  setTempSettings((prev) => ({
+                    ...prev,
+                    useFirstArtistOnly: checked,
+                  }))
+                }
+              />
+              <Label
+                htmlFor="use-first-artist-only"
+                className="text-sm cursor-pointer font-normal"
+              >
+                Usar solo el primer artista
+              </Label>
+            </div>
+
+            {/* Auto-convertir a MP3 */}
+            <div className="flex items-start gap-3">
+              <Switch
+                id="auto-convert-mp3"
+                checked={tempSettings.autoConvertToMp3}
+                onCheckedChange={(v) =>
+                  setTempSettings((prev) => ({
+                    ...prev,
+                    autoConvertToMp3: !!v,
+                  }))
+                }
+              />
+              <div className="space-y-1">
+                <Label
+                  htmlFor="auto-convert-mp3"
+                  className="text-sm font-normal cursor-pointer"
+                >
+                  Convertir automáticamente a MP3 (320 kbps)
+                </Label>
+                <p className="text-xs text-muted-foreground">
+                  Tras la descarga crea una copia MP3 en una carpeta MP3 junto
+                  al archivo original.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <Label className="text-sm">Formato de nombre de archivo</Label>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Info className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
+                </TooltipTrigger>
+                <TooltipContent side="top">
+                  <p className="text-xs whitespace-nowrap">
+                    Variables:{" "}
+                    {TEMPLATE_VARIABLES.map((v) => v.key).join(", ")}
+                  </p>
+                </TooltipContent>
+              </Tooltip>
+            </div>
+            <div className="flex gap-2">
+              <Select
+                value={tempSettings.filenamePreset}
+                onValueChange={(value: FilenamePreset) => {
+                  const preset = FILENAME_PRESETS[value];
+                  setTempSettings((prev) => ({
+                    ...prev,
+                    filenamePreset: value,
+                    filenameTemplate:
+                      value === "custom"
+                        ? prev.filenameTemplate || preset.template
+                        : preset.template,
+                  }));
+                }}
+              >
+                <SelectTrigger className="h-9 w-fit">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {Object.entries(FILENAME_PRESETS).map(
+                    ([key, { label }]) => (
+                      <SelectItem key={key} value={key}>
+                        {label}
+                      </SelectItem>
+                    ),
+                  )}
+                </SelectContent>
+              </Select>
+              {tempSettings.filenamePreset === "custom" && (
+                <InputWithContext
+                  value={tempSettings.filenameTemplate}
+                  onChange={(e) =>
+                    setTempSettings((prev) => ({
+                      ...prev,
+                      filenameTemplate: e.target.value,
+                    }))
+                  }
+                  placeholder="{track}. {title}"
+                  className="h-9 text-sm flex-1"
+                />
+              )}
+            </div>
+            {tempSettings.filenameTemplate && (
+              <p className="text-xs text-muted-foreground">
+                Vista previa:{" "}
+                <span className="font-mono">
+                  {tempSettings.filenameTemplate
                     .replace(/\{artist\}/g, "Kendrick Lamar, SZA")
                     .replace(/\{album_artist\}/g, "Kendrick Lamar")
                     .replace(/\{title\}/g, "All The Stars")
@@ -758,29 +992,35 @@ export function SettingsPage({ onUnsavedChangesChange, onResetRequest, }: Settin
                     .replace(/\{disc\}/g, "1")
                     .replace(/\{year\}/g, "2018")
                     .replace(/\{date\}/g, "2018-02-09")}
-                    .flac
-                  </span>
-                </p>)}
-            </div>
-          </div>)}
-      </div>
+                  .flac
+                </span>
+              </p>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
 
-      <Dialog open={showResetConfirm} onOpenChange={setShowResetConfirm}>
-        <DialogContent className="max-w-md [&>button]:hidden">
-          <DialogHeader>
-            <DialogTitle>Reset to Default?</DialogTitle>
-            <DialogDescription>
-              This will reset all settings to their default values. Your custom
-              configurations will be lost.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setShowResetConfirm(false)}>
-              Cancel
-            </Button>
-            <Button onClick={handleReset}>Reset</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </div>);
+    <Dialog open={showResetConfirm} onOpenChange={setShowResetConfirm}>
+      <DialogContent className="max-w-md [&>button]:hidden">
+        <DialogHeader>
+          <DialogTitle>¿Restablecer valores predeterminados?</DialogTitle>
+          <DialogDescription>
+            Esto restablecerá todos los ajustes a sus valores por defecto. Tus
+            configuraciones personalizadas se perderán.
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter>
+          <Button
+            variant="outline"
+            onClick={() => setShowResetConfirm(false)}
+          >
+            Cancelar
+          </Button>
+          <Button onClick={handleReset}>Restablecer</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  </div>
+);
 }

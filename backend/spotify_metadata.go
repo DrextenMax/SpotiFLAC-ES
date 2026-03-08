@@ -543,7 +543,7 @@ func (c *SpotifyMetadataClient) fetchAlbumWithClient(ctx context.Context, client
 		tracksData := getMap(albumData, "tracksV2")
 		items := getSlice(tracksData, "items")
 
-		if items == nil || len(items) == 0 {
+		if len(items) == 0 {
 			break
 		}
 
@@ -636,7 +636,7 @@ func (c *SpotifyMetadataClient) fetchPlaylist(ctx context.Context, playlistID st
 		content := getMap(playlistData, "content")
 		items := getSlice(content, "items")
 
-		if items == nil || len(items) == 0 {
+		if len(items) == 0 {
 			break
 		}
 
@@ -743,7 +743,7 @@ func (c *SpotifyMetadataClient) fetchArtistDiscography(ctx context.Context, pars
 		allData := getMap(discographyData, "all")
 		items := getSlice(allData, "items")
 
-		if items == nil || len(items) == 0 {
+		if len(items) == 0 {
 			break
 		}
 
@@ -1514,3 +1514,4 @@ func GetPreviewURL(trackID string) (string, error) {
 
 	return match, nil
 }
+
